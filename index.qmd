@@ -1,5 +1,5 @@
 ---
-title: "jenglot2"
+title: "jenglot"
 listing:
   contents: posts
   sort: "date desc"
