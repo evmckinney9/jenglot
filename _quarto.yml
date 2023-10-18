@@ -1,0 +1,30 @@
+project:
+  type: website
+
+website:
+  title: "jenglot2"
+  navbar:
+    right:
+      - icon: github
+        href: https://github.com/
+format:
+  html:
+    theme: default
+    css: styles.css
+
+author: "Evan McKinney"
+toc: true
+number-sections: true
+highlight-style: pygments
+
+comments:
+  giscus: 
+    repo: evmckinney9/jenglot
+
+# freeze computational output
+# (see https://quarto.org/docs/projects/code-execution.html#freeze)
+freeze: true
+
+# Enable banner style title blocks
+title-block-banner: true
+
