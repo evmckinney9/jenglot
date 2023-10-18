@@ -1,1 +1,1 @@
-Sitemap: https://evmckinney9.github.io/jenglot/sitemap.xml
+Sitemap: https://github.com/evmckinney9/jenglot/sitemap.xml
