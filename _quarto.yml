@@ -6,6 +6,7 @@ website:
   description: "A blog about quantum computing, programming, and other things."
   favicon: assets/favicon.ico
   site-url: https://blog.evm9.dev
+  google-analytics: "G-0S6658MQKV"
   navbar:
     right:
       - icon: github
