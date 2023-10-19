@@ -1,0 +1,38 @@
+toc: true
+number-sections: false
+
+author:
+  - name: Evan McKinney
+    id: evm9
+    orcid: 0000-0002-4865-5458
+    email: evmckinney9@gmail.com
+    url: https://www.evm9.dev
+
+comments:
+  giscus: 
+    repo: evmckinney9/jenglot
+
+image: figures/cover.png
+
+# freeze computational output
+# (see https://quarto.org/docs/projects/code-execution.html#freeze)
+freeze: true
+
+# Enable banner style title blocks
+
+# title-block-banner-color: "#000000"
+
+# code-line-numbers: true
+highlight-style: breezedark
+code-overflow: wrap
+
+format:
+  html:
+    title-block-banner: banner.png
+    template-partials: 
+      - _partials/title-block.html
+
+bibliography: refs.bib
+
+keywords:
+  - Quantum Computing
