@@ -10,5 +10,5 @@ listing:
     sort-ui: false
     filter-ui: false
     image-align: left
-    fields: [image, date, title, subtitle, categories]
+    fields: [image, date, title, subtitle, categories, description]
 ---
