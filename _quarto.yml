@@ -3,6 +3,7 @@ project:
 
 website:
   title: "Evan's Blog"
+  description: "A blog about quantum computing, programming, and other things."
   favicon: assets/favicon.ico
   site-url: https://blog.evm9.dev
   navbar:
