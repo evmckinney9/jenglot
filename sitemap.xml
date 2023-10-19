@@ -2,14 +2,10 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://blog.evm9.dev/index.html</loc>
-    <lastmod>2023-10-19T05:21:20.822Z</lastmod>
+    <lastmod>2023-10-19T16:36:15.398Z</lastmod>
   </url>
   <url>
     <loc>https://blog.evm9.dev/posts/depth/index.html</loc>
-    <lastmod>2023-10-19T05:21:18.770Z</lastmod>
-  </url>
-  <url>
-    <loc>https://blog.evm9.dev/posts/asymptote/index.html</loc>
-    <lastmod>2023-10-19T05:21:20.002Z</lastmod>
+    <lastmod>2023-10-19T16:36:12.270Z</lastmod>
   </url>
 </urlset>
