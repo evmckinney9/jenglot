@@ -30,7 +30,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./favicon.ico" rel="icon">
+<link href="./assets/favicon.ico" rel="icon">
 <script src="site_libs/quarto-listing/list.min.js"></script>
 <script src="site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="site_libs/quarto-html/quarto.js"></script>
@@ -72,7 +72,7 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-subtitle','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-image','listing-date','listing-title','listing-subtitle','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
       searchColumns: ["listing-date","listing-title","listing-author","listing-subtitle","listing-image","listing-description","listing-categories"],
     };
@@ -91,12 +91,19 @@ ul.task-list li input[type="checkbox"] {
     }
   })
   </script>
+<style>
+
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(assets/img/banner.png);
+background-size: cover;
+      }
+</style>
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
-</head>
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="alternate" type="application/rss+xml" title="Evan's Blog" href="index.xml"></head>
 
 <body class="nav-fixed">
 
@@ -133,7 +140,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Qiskit">Qiskit <span class="quarto-category-count">(1)</span></div><div class="category" data-category="jupyter">jupyter <span class="quarto-category-count">(1)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(2)</span></div><div class="category" data-category="Qiskit">Qiskit <span class="quarto-category-count">(2)</span></div><div class="category" data-category="jupyter">jupyter <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
 
@@ -145,12 +152,43 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="jupyter,Qiskit" data-listing-date-sort="1697587200000" data-listing-file-modified-sort="1697688260409" data-listing-date-modified-sort="1697688260000" data-listing-reading-time-sort="1">
+<div class="quarto-post image-left" data-index="0" data-categories="jupyter,Qiskit" data-listing-date-sort="1697673600000" data-listing-file-modified-sort="1697691143611" data-listing-date-modified-sort="1697691143000" data-listing-reading-time-sort="1">
 <div class="thumbnail">
-<p><a href="./posts/asymptote/03_asymptote.html"> <img src="./posts/asymptote/figures/cover.png" class="thumbnail-image"> </a></p>
+<p><a href="./posts/depth/index.html"> <img src="./posts/depth/figures/cover.png" class="thumbnail-image"> </a></p>
 </div>
 <div class="body">
-<a href="./posts/asymptote/03_asymptote.html">
+<a href="./posts/depth/index.html">
+<h3 class="no-anchor listing-title">
+Second Post
+</h3>
+<div class="listing-subtitle">
+Quantum Volume Experiment
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('jupyter'); return false;">
+jupyter
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('Qiskit'); return false;">
+Qiskit
+</div>
+</div>
+<a href="./posts/depth/index.html"> </a>
+</div>
+<div class="metadata">
+<a href="./posts/depth/index.html">
+<div class="listing-date">
+Oct 19, 2023
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-left" data-index="1" data-categories="jupyter,Qiskit" data-listing-date-sort="1697587200000" data-listing-file-modified-sort="1697691143611" data-listing-date-modified-sort="1697691143000" data-listing-reading-time-sort="1">
+<div class="thumbnail">
+<p><a href="./posts/asymptote/index.html"> <img src="./posts/asymptote/figures/cover.png" class="thumbnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/asymptote/index.html">
 <h3 class="no-anchor listing-title">
 First Post
 </h3>
@@ -166,19 +204,12 @@ jupyter
 Qiskit
 </div>
 </div>
-<a href="./posts/asymptote/03_asymptote.html">
-<div class="listing-description">
-<p>This is the description</p>
-</div>
-</a>
+<a href="./posts/asymptote/index.html"> </a>
 </div>
 <div class="metadata">
-<a href="./posts/asymptote/03_asymptote.html">
+<a href="./posts/asymptote/index.html">
 <div class="listing-date">
 Oct 18, 2023
-</div>
-<div class="listing-author">
-Evan McKinney
 </div>
 </a>
 </div>
