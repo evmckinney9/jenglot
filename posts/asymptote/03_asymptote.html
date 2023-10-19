@@ -7,8 +7,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Evan McKinney">
+<meta name="dcterms.date" content="2023-10-18">
+<meta name="keywords" content="Quantum Computing">
+<meta name="description" content="This is the description">
 
-<title>jenglot - First Post Test</title>
+<title>Evan’s Blog - First Post</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,6 +68,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
+<link href="../../favicon.ico" rel="icon">
 <script src="../../site_libs/quarto-html/quarto.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -94,7 +98,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<style>
 
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(../banner.png);
+background-size: cover;
+      }
+</style>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -107,7 +120,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="../../index.html">
-    <span class="navbar-title">jenglot</span>
+    <span class="navbar-title">Evan’s Blog</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -117,7 +130,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/evmckinney9/jenglot" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -130,28 +143,59 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 <!-- content -->
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-body">
-      <h1 class="title">First Post Test</h1>
-                      </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      <div>
-      <div class="quarto-title-meta-heading">Author</div>
-      <div class="quarto-title-meta-contents">
-               <p>Evan McKinney </p>
+    <div class="quarto-title-banner page-columns page-full">
+        <style>
+            .quarto-title-banner .quarto-title {
+                background-color: rgba(36, 36, 36, 0.85);
+                /* white with 80% opacity */
+                padding: 10px;
+                border-radius: 10px;
+                /* Optional: if you want rounded corners for the box */
+            }
+        </style>
+        <div class="quarto-title column-body">
+            <h1 class="title">First Post</h1>
+                        <p class="subtitle lead">Notebook for debugging Quarto Formatting</p>
+                                    <div>
+                <div class="description">
+                    <p>This is the description</p>
+                </div>
             </div>
+                                                <div class="quarto-categories">
+                                <div class="quarto-category">jupyter</div>
+                                <div class="quarto-category">Qiskit</div>
+                            </div>
+                                </div>
     </div>
-      
+
     
+    <div class="quarto-title-meta">
+
+        <div>
+        <div class="quarto-title-meta-heading">Author</div>
+        <div class="quarto-title-meta-contents">
+                 <p><a href="https://www.evm9.dev">Evan McKinney</a> <a href="https://orcid.org/0000-0002-4865-5458" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+              </div>
+      </div>
+        
+        <div>
+        <div class="quarto-title-meta-heading">Published</div>
+        <div class="quarto-title-meta-contents">
+          <p class="date">October 18, 2023</p>
+        </div>
+      </div>
       
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+        <div>
+        <div class="quarto-title-meta-heading">Modified</div>
+        <div class="quarto-title-meta-contents">
+          <p class="date-modified">October 19, 2023</p>
+        </div>
+      </div>
+        
+      </div>
+      
+
+</header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
@@ -159,10 +203,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#testing-header-update" id="toc-testing-header-update" class="nav-link active" data-scroll-target="#testing-header-update"><span class="header-section-number">1</span> Testing Header Update !!!</a>
+  <li><a href="#testing-header-update" id="toc-testing-header-update" class="nav-link active" data-scroll-target="#testing-header-update">Testing Header Update !!!</a>
   <ul class="collapse">
-  <li><a href="#making-sure-monodromy-works-for-a-basic-example." id="toc-making-sure-monodromy-works-for-a-basic-example." class="nav-link" data-scroll-target="#making-sure-monodromy-works-for-a-basic-example."><span class="header-section-number">1.0.1</span> Making sure monodromy works for a basic example.</a></li>
-  <li><a href="#calculate-asymptotic-haar-score-for-iswap-basis." id="toc-calculate-asymptotic-haar-score-for-iswap-basis." class="nav-link" data-scroll-target="#calculate-asymptotic-haar-score-for-iswap-basis."><span class="header-section-number">1.1</span> Calculate asymptotic Haar score for iSWAP basis.</a></li>
+  <li><a href="#making-sure-monodromy-works-for-a-basic-example." id="toc-making-sure-monodromy-works-for-a-basic-example." class="nav-link" data-scroll-target="#making-sure-monodromy-works-for-a-basic-example.">Making sure monodromy works for a basic example.</a></li>
+  <li><a href="#calculate-asymptotic-haar-score-for-iswap-basis." id="toc-calculate-asymptotic-haar-score-for-iswap-basis." class="nav-link" data-scroll-target="#calculate-asymptotic-haar-score-for-iswap-basis.">Calculate asymptotic Haar score for iSWAP basis.</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -172,13 +216,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-
-<section id="testing-header-update" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Testing Header Update !!!</h1>
+<section id="testing-header-update" class="level1">
+<h1>Testing Header Update !!!</h1>
 <p>Here is some info. Here is some more info.</p>
-<p>We incldue this because of matplotlib versioning.</p>
 <div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># !pip uninstall -y matplotlib &amp;&amp; pip install matplotlib==3.7.2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Temp fix for matplotlib versioning.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note no-icon callout-titled" title="QSP circuit">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+QSP circuit
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><span class="math display">\[\begin{align}
+U*\phi =S(\phi_0)\prod*{i=1}^d R(a) S(\phi*i) = S(\phi_0)R(a) S(\phi_1) R(a)\dots S(\phi*{d-1}) R(a) S(\phi_d)
+\end{align}\]</span></p>
+</div>
 </div>
 <div class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define gateset as any basis with coordinates (x,y, 0)</span></span>
@@ -209,8 +279,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>h <span class="op">=</span> iSwapGate().power(hp)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>gates <span class="op">=</span> [(g, gp), (h, hp)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="making-sure-monodromy-works-for-a-basic-example." class="level3" data-number="1.0.1">
-<h3 data-number="1.0.1" class="anchored" data-anchor-id="making-sure-monodromy-works-for-a-basic-example."><span class="header-section-number">1.0.1</span> Making sure monodromy works for a basic example.</h3>
+<section id="making-sure-monodromy-works-for-a-basic-example." class="level3">
+<h3 class="anchored" data-anchor-id="making-sure-monodromy-works-for-a-basic-example.">Making sure monodromy works for a basic example.</h3>
 <p>Test with a single gate compared to a basis with two basis gates.</p>
 <div class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># print(gates_to_haar(g, h))</span></span>
@@ -229,15 +299,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>0.8787242759647856</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="14">
+<p>See <a href="#fig-coverage1">Figure&nbsp;1</a> to see the coverage set.</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>_plot_coverage_set(coverage)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="03_asymptote_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+<div id="fig-coverage1" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="03_asymptote_files/figure-html/fig-coverage1-output-1.png" class="img-fluid figure-img"></p>
+<figcaption class="figure-caption">Figure&nbsp;1: Coverage set for a mixed basis.</figcaption>
+</figure>
+</div>
 </div>
 </div>
 </section>
-<section id="calculate-asymptotic-haar-score-for-iswap-basis." class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="calculate-asymptotic-haar-score-for-iswap-basis."><span class="header-section-number">1.1</span> Calculate asymptotic Haar score for iSWAP basis.</h2>
+<section id="calculate-asymptotic-haar-score-for-iswap-basis." class="level2">
+<h2 class="anchored" data-anchor-id="calculate-asymptotic-haar-score-for-iswap-basis.">Calculate asymptotic Haar score for iSWAP basis.</h2>
 <div class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hardcoded list of denominators: powers of 2 and primes up to 64</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>denominators <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>, <span class="dv">32</span>, <span class="dv">64</span>]</span>
@@ -656,7 +732,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<script src="https://giscus.app/client.js" data-repo="evmckinney9/jenglot" data-repo-id="" data-category="General" data-category-id="" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+<script src="https://giscus.app/client.js" data-repo="evmckinney9/jenglot" data-repo-id="R_kgDOKiMvFg" data-category="General" data-category-id="" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
 </script>
 </div> <!-- /content -->
 
