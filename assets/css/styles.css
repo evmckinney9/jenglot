@@ -1,0 +1,7 @@
+/* css styles */
+.quarto-title-banner .quarto-title {
+    background-color: rgba(36, 36, 36, 0.85);
+    /* white with 80% opacity */
+    padding: 10px;
+    border-radius: 10px;
+}

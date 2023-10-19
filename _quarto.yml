@@ -3,7 +3,7 @@ project:
 
 website:
   title: "Evan's Blog"
-  favicon: favicon.ico
+  favicon: assets/favicon.ico
   site-url: https://blog.evm9.dev
   navbar:
     right:
@@ -12,7 +12,7 @@ website:
 format:
   html:
     theme: default  
-    css: styles.css
+    css: assets/css/styles.css
 
 resources:
   - CNAME

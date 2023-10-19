@@ -11,6 +11,7 @@ author:
 comments:
   giscus: 
     repo: evmckinney9/jenglot
+    category: General
 
 image: figures/cover.png
 
@@ -18,19 +19,18 @@ image: figures/cover.png
 # (see https://quarto.org/docs/projects/code-execution.html#freeze)
 freeze: true
 
-# Enable banner style title blocks
-
-# title-block-banner-color: "#000000"
-
 # code-line-numbers: true
 highlight-style: breezedark
 code-overflow: wrap
 
+# Enable banner style title blocks
 format:
   html:
-    title-block-banner: banner.png
+    title-block-banner: ../assets/img/banner.png
     template-partials: 
       - _partials/title-block.html
+    
+    highlight-style: breezedark
 
 bibliography: refs.bib
 

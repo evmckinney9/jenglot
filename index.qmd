@@ -1,13 +1,14 @@
 ---
-listing:
-  contents: posts
-  sort: "date desc"
-  type: default
-  categories: true
-  sort-ui: false
-  filter-ui: false
 page-layout: article
-title-block-banner: true
+title-block-banner: assets/img/banner.png
+listing:
+    contents: posts
+    type: default
+    feed: true
+    sort: "date desc"
+    categories: true
+    sort-ui: false
+    filter-ui: false
+    image-align: left
+    fields: [image, date, title, subtitle, categories]
 ---
-
-
