@@ -2,14 +2,14 @@
 page-layout: article
 title-block-banner: assets/img/banner.png
 listing:
-    contents: posts
-    type: default
-    feed: true
-        type: partial
-    sort: "date desc"
-    categories: true
-    sort-ui: false
-    filter-ui: false
-    image-align: left
-    fields: [image, date, title, subtitle, categories, description]
+  contents: posts
+  type: default
+  feed: 
+    type: partial
+  sort: "date desc"
+  categories: true
+  sort-ui: false
+  filter-ui: false
+  image-align: left
+  fields: [image, date, title, subtitle, categories, description]
 ---
