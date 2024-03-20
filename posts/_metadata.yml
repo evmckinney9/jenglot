@@ -1,12 +1,13 @@
 toc: true
 number-sections: false
+smooth-scroll: true
 
 author:
   - name: Evan McKinney
     id: evm9
     orcid: 0000-0002-4865-5458
     email: evmckinney9@gmail.com
-    url: https://www.evm9.dev
+    # url: https://www.evm9.dev
 
 comments:
   giscus: 
@@ -18,21 +19,17 @@ image: figures/cover.png
 # freeze computational output
 # (see https://quarto.org/docs/projects/code-execution.html#freeze)
 freeze: true
-
-# code-line-numbers: true
-highlight-style: breezedark
-code-overflow: wrap
+code-line-numbers: true
+highlight-style: atom-one
+code-overflow: scroll
+code-block-bg: true
+code-block-border-left: "#517699"
 
 # Enable banner style title blocks
 format:
   html:
-    title-block-banner: ../assets/img/banner.png
-    template-partials: 
-      - _partials/title-block.html
-    
-    highlight-style: breezedark
+    title-block-banner: ../assets/img/banner.png  
+
 
 bibliography: refs.bib
-
-keywords:
-  - Quantum Computing
+csl: ../assets/css/ieee.csl
