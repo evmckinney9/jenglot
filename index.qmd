@@ -4,7 +4,7 @@ title-block-banner: assets/img/banner.png
 listing:
     contents: posts
     type: default
-    feed: true
+    feed:
         type: partial
     sort: "date desc"
     categories: true
