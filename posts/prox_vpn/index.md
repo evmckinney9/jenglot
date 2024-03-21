@@ -150,10 +150,10 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
         sysctl -p
         iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
         ```
-      - Save the iptables configuration to persist across reboots:
-        ```bash
-        netfilter-persistent save
-        ```
+        - Save the iptables configuration to persist across reboots:
+            ```bash
+            netfilter-persistent save
+            ```
 
     - **qBittorrent LXC**:
         - Define the WireGuard LXC as the default gateway. Update `/etc/network/interfaces` with the gateway and DNS settings.
@@ -181,23 +181,23 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
 I recommend using a static IP address for the qBittorrent LXC as DHCP can cause issues with the setup's persistence across reboots.
 :::
 
-      ![Figure 10: Default routing through the VPN bridge.](figures/image-10.png)  
+        ![Figure 10: Default routing through the VPN bridge.](figures/image-10.png)  
 
-      - Restart network services to apply changes.
+        - Restart network services to apply changes.
 
-    - Confirm the successful gateway configuration by verifying the IP address is now resolved through the VPN:
+        - Confirm the successful gateway configuration by verifying the IP address is now resolved through the VPN:
 
-    ```bash
-    ping -c 4 google.com  # Test DNS resolution
-    curl ifconfig.me  # Should return the WireGuard IP
-    ```
+        ```bash
+        ping -c 4 google.com  # Test DNS resolution
+        curl ifconfig.me  # Should return the WireGuard IP
+        ```
 
-    - In case of any configuration issues, try bypassing Proxmox's configuration checks:
+        - In case of any configuration issues, try bypassing Proxmox's configuration checks:
 
-    ```bash
-    touch /.pve-ignore.resolv.conf
-    touch /etc/network/.pve-ignore.interfaces
-    ```
+        ```bash
+        touch /.pve-ignore.resolv.conf
+        touch /etc/network/.pve-ignore.interfaces
+        ```
 
 ## qBittorrent client configuration
 
