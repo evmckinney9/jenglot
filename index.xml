@@ -15,7 +15,7 @@
   <title>Configuring an LXC container with an external VPN</title>
   <dc:creator>Evan McKinney</dc:creator>
   <link>https://blog.evm9.dev/posts/prox_vpn/</link>
-  <description><![CDATA[ This guide aims to seamlessly integrate your LXC container with an external VPN service, enhancing privacy and security for your containerized applications. ]]></description>
+  <description><![CDATA[ This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications. ]]></description>
   <category>proxmox</category>
   <category>devops</category>
   <guid>https://blog.evm9.dev/posts/prox_vpn/</guid>
