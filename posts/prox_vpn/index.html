@@ -7,10 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Evan McKinney">
-<meta name="dcterms.date" content="2023-10-19">
-<meta name="description" content="This is the description, using Qiskit noise models something something">
+<meta name="dcterms.date" content="2024-03-20">
+<meta name="description" content="This guide aims to seamlessly integrate your LXC container with an external VPN service, enhancing privacy and security for your containerized applications.">
 
-<title>Evan’s Blog - Second Post</title>
+<title>Evan’s Blog - Configuring an LXC container with an external VPN</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -122,35 +122,6 @@ background-size: cover;
       }
 </style>
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
@@ -188,16 +159,15 @@ window.Quarto = {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Second Post</h1>
-            <p class="subtitle lead">Quantum Volume Experiment</p>
+      <h1 class="title">Configuring an LXC container with an external VPN</h1>
                   <div>
         <div class="description">
-          <p>This is the description, using Qiskit noise models something something</p>
+          <p>This guide aims to seamlessly integrate your LXC container with an external VPN service, enhancing privacy and security for your containerized applications.</p>
         </div>
       </div>
                           <div class="quarto-categories">
-                <div class="quarto-category">jupyter</div>
-                <div class="quarto-category">Qiskit</div>
+                <div class="quarto-category">proxmox</div>
+                <div class="quarto-category">devops</div>
               </div>
                   </div>
   </div>
@@ -215,16 +185,10 @@ window.Quarto = {
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">October 19, 2023</p>
+        <p class="date">March 20, 2024</p>
       </div>
     </div>
     
-      <div>
-      <div class="quarto-title-meta-heading">Modified</div>
-      <div class="quarto-title-meta-contents">
-        <p class="date-modified">March 21, 2024</p>
-      </div>
-    </div>
       
     </div>
     
@@ -233,7 +197,21 @@ window.Quarto = {
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#objective" id="toc-objective" class="nav-link active" data-scroll-target="#objective">Objective</a></li>
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a>
+  <ul class="collapse">
+  <li><a href="#wireguard-lxc" id="toc-wireguard-lxc" class="nav-link" data-scroll-target="#wireguard-lxc">WireGuard LXC</a></li>
+  <li><a href="#qbittorrent-lxc" id="toc-qbittorrent-lxc" class="nav-link" data-scroll-target="#qbittorrent-lxc">qBittorrent LXC</a></li>
+  <li><a href="#network-bridge" id="toc-network-bridge" class="nav-link" data-scroll-target="#network-bridge">Network bridge</a></li>
+  <li><a href="#qbittorrent-client-configuration" id="toc-qbittorrent-client-configuration" class="nav-link" data-scroll-target="#qbittorrent-client-configuration">qBittorrent client configuration</a></li>
+  </ul></li>
+  <li><a href="#verification" id="toc-verification" class="nav-link" data-scroll-target="#verification">Verification</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -242,194 +220,289 @@ window.Quarto = {
 
 
 
-<p>Goal is to create a generic quantum noise model, simulate a circuit and show the relationship between circuit depth and fidelity.</p>
-<p>Fidelity is defined using.</p>
-<p><span class="math display">\[
-F(\rho_1, \rho_2) \!=\! \text{Tr}[\sqrt{\sqrt{\rho_1}\rho_2\sqrt{\rho_1}}]^2
-\]</span></p>
-<p>Approximate as a function of depth, for an <span class="math inline">\(N\)</span> qubit circuit with duration <span class="math inline">\(D_C\)</span>:</p>
-<p><span class="math display">\[
-F_T \!=\! e^{-N  D_C \left( \frac{1}{T_1} + \frac{1}{T_2} \right)}
-\]</span></p>
-<div id="cell-2" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">from</span> qiskit.transpiler.coupling <span class="im">import</span> CouplingMap</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-3"><a href="#cb1-3"></a></span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="co"># Import from Qiskit Aer noise module</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a></span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="im">from</span> mirror_gates.noisy_fidelity <span class="im">import</span> get_noisy_fidelity</span>
-<span id="cb1-7"><a href="#cb1-7"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm</span>
-<span id="cb1-8"><a href="#cb1-8"></a></span>
-<span id="cb1-9"><a href="#cb1-9"></a><span class="im">from</span> qiskit.circuit.random <span class="im">import</span> random_circuit</span>
-<span id="cb1-10"><a href="#cb1-10"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="im">from</span> qiskit.circuit.library <span class="im">import</span> QFT</span>
-<span id="cb1-13"><a href="#cb1-13"></a><span class="im">from</span> qiskit.transpiler <span class="im">import</span> CouplingMap</span>
-<span id="cb1-14"><a href="#cb1-14"></a><span class="im">from</span> mirror_gates.noisy_fidelity <span class="im">import</span> T1, T2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="objective" class="level1">
+<h1>Objective</h1>
+<p>This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications.</p>
+<ul>
+<li><p><strong>Proxmox Virtual Environment</strong>: A server management platform that allows you to deploy, manage, and monitor LXC containers. For more information visit <a href="https://www.proxmox.com/proxmox-ve">Proxmox VE</a>.</p></li>
+<li><p><strong>TTeck’s Proxmox Helper Scripts</strong>: These scripts make it easier to create and manage LXC containers. Learn more <a href="https://tteck.github.io/Proxmox/">here</a>.</p></li>
+</ul>
+<p>In this guide, we will configure a qBittorrent LXC container to use WireGuard VPN as its network gateway. I selected AirVPN as the VPN provider due to its support for peer-to-peer (P2P) connections and port forwarding capabilities. However, the concepts and steps outlined here can be adapted to other VPN services and applications according to your needs.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-<div id="cell-3" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1"></a>N <span class="op">=</span> <span class="dv">8</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="co"># coupling_map = CouplingMap.from_full(N)</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a>coupling_map <span class="op">=</span> CouplingMap.from_line(N)</span>
-<span id="cb2-4"><a href="#cb2-4"></a></span>
-<span id="cb2-5"><a href="#cb2-5"></a>data1 <span class="op">=</span> []</span>
-<span id="cb2-6"><a href="#cb2-6"></a></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="cf">for</span> i <span class="kw">in</span> tqdm(<span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">100</span>, <span class="dv">4</span>)):</span>
-<span id="cb2-8"><a href="#cb2-8"></a>    qc <span class="op">=</span> random_circuit(N, i, max_operands<span class="op">=</span><span class="dv">2</span>, measure<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb2-9"><a href="#cb2-9"></a>    fid, duration, transp, expected_fid <span class="op">=</span> get_noisy_fidelity(qc, coupling_map)</span>
-<span id="cb2-10"><a href="#cb2-10"></a>    data1.append((i, duration, fid))  <span class="co"># Added depth (i) here</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>  0%|          | 0/25 [00:00&lt;?, ?it/s]  4%|▍         | 1/25 [00:00&lt;00:15,  1.52it/s]  8%|▊         | 2/25 [00:01&lt;00:19,  1.18it/s] 12%|█▏        | 3/25 [00:02&lt;00:19,  1.15it/s] 16%|█▌        | 4/25 [00:03&lt;00:18,  1.15it/s] 20%|██        | 5/25 [00:04&lt;00:18,  1.09it/s] 24%|██▍       | 6/25 [00:05&lt;00:18,  1.03it/s] 28%|██▊       | 7/25 [00:06&lt;00:18,  1.02s/it] 32%|███▏      | 8/25 [00:07&lt;00:18,  1.08s/it] 36%|███▌      | 9/25 [00:09&lt;00:18,  1.16s/it] 40%|████      | 10/25 [00:10&lt;00:17,  1.20s/it] 44%|████▍     | 11/25 [00:11&lt;00:17,  1.27s/it] 48%|████▊     | 12/25 [00:13&lt;00:17,  1.32s/it] 52%|█████▏    | 13/25 [00:14&lt;00:16,  1.35s/it] 56%|█████▌    | 14/25 [00:16&lt;00:15,  1.40s/it] 60%|██████    | 15/25 [00:17&lt;00:14,  1.45s/it] 64%|██████▍   | 16/25 [00:19&lt;00:13,  1.53s/it] 68%|██████▊   | 17/25 [00:21&lt;00:13,  1.63s/it] 72%|███████▏  | 18/25 [00:23&lt;00:11,  1.67s/it] 76%|███████▌  | 19/25 [00:25&lt;00:10,  1.75s/it] 80%|████████  | 20/25 [00:27&lt;00:09,  1.85s/it] 84%|████████▍ | 21/25 [00:29&lt;00:07,  1.94s/it] 88%|████████▊ | 22/25 [00:31&lt;00:06,  2.11s/it] 92%|█████████▏| 23/25 [00:33&lt;00:04,  2.12s/it] 96%|█████████▌| 24/25 [00:36&lt;00:02,  2.12s/it]100%|██████████| 25/25 [00:38&lt;00:00,  1.54s/it]</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Expected fidelity: 9.60821465974009e-17
-Expected fidelity: 6.52779751009869e-10
-Expected fidelity: 1.5537993518317284e-07
-Expected fidelity: 1.487574536904077e-06
-Expected fidelity: 3.291008796328393e-05
-Expected fidelity: 4.646880900392177e-05
-Expected fidelity: 0.00031885528474234146
-Expected fidelity: 0.0009914552912741671
-Expected fidelity: 0.002265137938156348
-Expected fidelity: 0.00474708453201627
-Expected fidelity: 0.005742519985323932
-Expected fidelity: 0.012303325377327416
-Expected fidelity: 0.014502353992713901
-Expected fidelity: 0.01696102593499301
-Expected fidelity: 0.030367935062946428
-Expected fidelity: 0.044957026811720244
-Expected fidelity: 0.04889008093421703
-Expected fidelity: 0.08643001927870636
-Expected fidelity: 0.09467141196821131
-Expected fidelity: 0.14829149077067763
-Expected fidelity: 0.1370878899752673
-Expected fidelity: 0.1723881232610031
-Expected fidelity: 0.16047253150531207
-Expected fidelity: 0.22566044135606483
-Expected fidelity: 0.19601552561410554</code></pre>
+<div class="callout-title-container flex-fill">
+Warning
 </div>
 </div>
-<div id="cell-4" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="co"># sort by duration</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>data1 <span class="op">=</span> <span class="bu">sorted</span>(data1, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])</span>
-<span id="cb5-3"><a href="#cb5-3"></a>depths_sorted, durations_sorted, fidelities_sorted <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>data1)</span>
-<span id="cb5-4"><a href="#cb5-4"></a></span>
-<span id="cb5-5"><a href="#cb5-5"></a>fig, ax1 <span class="op">=</span> plt.subplots()</span>
-<span id="cb5-6"><a href="#cb5-6"></a></span>
-<span id="cb5-7"><a href="#cb5-7"></a><span class="co"># Plotting the fidelity vs. duration (main line)</span></span>
-<span id="cb5-8"><a href="#cb5-8"></a>ax1.set_xlabel(<span class="st">"Duration"</span>)</span>
-<span id="cb5-9"><a href="#cb5-9"></a>ax1.set_ylabel(<span class="st">"Fidelity"</span>)</span>
-<span id="cb5-10"><a href="#cb5-10"></a>ax1.plot(durations_sorted, fidelities_sorted, label<span class="op">=</span><span class="st">"Fidelity"</span>)</span>
-<span id="cb5-11"><a href="#cb5-11"></a></span>
-<span id="cb5-12"><a href="#cb5-12"></a><span class="co"># Setting the secondary x-axis for the depth of the random circuit</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a>ax2 <span class="op">=</span> ax1.twiny()</span>
-<span id="cb5-14"><a href="#cb5-14"></a>ax2.set_xlabel(<span class="st">"Depth of Random Circuit"</span>)</span>
-<span id="cb5-15"><a href="#cb5-15"></a>ax2.set_xticks(durations_sorted)</span>
-<span id="cb5-16"><a href="#cb5-16"></a>ax2.set_xticklabels(depths_sorted)</span>
-<span id="cb5-17"><a href="#cb5-17"></a></span>
-<span id="cb5-18"><a href="#cb5-18"></a>n_qubits <span class="op">=</span> N</span>
-<span id="cb5-19"><a href="#cb5-19"></a>duration_samples <span class="op">=</span> np.linspace(<span class="bu">min</span>(durations_sorted), <span class="bu">max</span>(durations_sorted), <span class="dv">500</span>)</span>
-<span id="cb5-20"><a href="#cb5-20"></a>decay_factor <span class="op">=</span> [(<span class="dv">1</span> <span class="op">/</span> T1 <span class="op">+</span> <span class="dv">1</span> <span class="op">/</span> T2) <span class="op">*</span> duration <span class="cf">for</span> duration <span class="kw">in</span> duration_samples]</span>
-<span id="cb5-21"><a href="#cb5-21"></a>single_qubit_fidelity <span class="op">=</span> [np.exp(<span class="op">-</span>factor) <span class="cf">for</span> factor <span class="kw">in</span> decay_factor]</span>
-<span id="cb5-22"><a href="#cb5-22"></a>total_fidelity <span class="op">=</span> [fidelity<span class="op">**</span>n_qubits <span class="cf">for</span> fidelity <span class="kw">in</span> single_qubit_fidelity]</span>
-<span id="cb5-23"><a href="#cb5-23"></a>label_string <span class="op">=</span> <span class="vs">r"$\left( e^{(-D/T_1 -D/T_2)} \right)^</span><span class="sc">{N}</span><span class="vs">$"</span></span>
-<span id="cb5-24"><a href="#cb5-24"></a></span>
-<span id="cb5-25"><a href="#cb5-25"></a>ax1.plot(duration_samples, total_fidelity, label<span class="op">=</span>label_string, linestyle<span class="op">=</span><span class="st">"--"</span>)</span>
-<span id="cb5-26"><a href="#cb5-26"></a>ax1.legend()</span>
-<span id="cb5-27"><a href="#cb5-27"></a></span>
-<span id="cb5-28"><a href="#cb5-28"></a></span>
-<span id="cb5-29"><a href="#cb5-29"></a>plt.title(<span class="st">"Random Circuit (8-qubits) Fidelity vs Duration with Circuit Depth Reference"</span>)</span>
-<span id="cb5-30"><a href="#cb5-30"></a>plt.tight_layout()  <span class="co"># Adjust layout to prevent overlap</span></span>
-<span id="cb5-31"><a href="#cb5-31"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
+<div class="callout-body-container callout-body">
+<p>Please use this guide responsibly. I’m not an expert and cannot guarantee the security of your setup.</p>
+</div>
+</div>
+</section>
+<section id="setup" class="level1">
+<h1>Setup</h1>
+<section id="wireguard-lxc" class="level2">
+<h2 class="anchored" data-anchor-id="wireguard-lxc">WireGuard LXC</h2>
+<p>First, set up WireGuard LXC to integrate your container with the VPN:</p>
+<ol type="1">
+<li><p><strong>Installing WireGuard LXC</strong>: Start by executing the script on your host machine and accept the default settings.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="at">-c</span> <span class="st">"</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">-qLO</span> <span class="at">-</span> https://github.com/tteck/Proxmox/raw/main/ct/wireguard.sh<span class="va">)</span><span class="st">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/cell-4-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="figures/image-18.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1: Initiating WireGuard LXC setup.</figcaption>
 </figure>
 </div>
-</div>
-</div>
-<div id="cell-5" class="cell" data-execution_count="47">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a>N <span class="op">=</span> <span class="dv">8</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a>coupling_map <span class="op">=</span> CouplingMap.from_full(N)</span>
-<span id="cb6-3"><a href="#cb6-3"></a>data2 <span class="op">=</span> []</span>
-<span id="cb6-4"><a href="#cb6-4"></a></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="cf">for</span> i <span class="kw">in</span> tqdm(<span class="bu">range</span>(<span class="dv">2</span>, N <span class="op">+</span> <span class="dv">1</span>)):</span>
-<span id="cb6-6"><a href="#cb6-6"></a>    qc <span class="op">=</span> QFT(i)</span>
-<span id="cb6-7"><a href="#cb6-7"></a>    fid, duration, transp <span class="op">=</span> get_noisy_fidelity(qc, coupling_map)</span>
-<span id="cb6-8"><a href="#cb6-8"></a>    data2.append((i, duration, fid))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>  0%|          | 0/7 [00:00&lt;?, ?it/s]100%|██████████| 7/7 [00:14&lt;00:00,  2.06s/it]</code></pre>
-</div>
-</div>
-<div id="cell-6" class="cell" data-execution_count="49">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1"></a><span class="co"># sort by duration</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a>data2 <span class="op">=</span> <span class="bu">sorted</span>(data2, key<span class="op">=</span><span class="kw">lambda</span> x: x[<span class="dv">1</span>])</span>
-<span id="cb8-3"><a href="#cb8-3"></a>sizes_sorted, durations_sorted, fidelities_sorted <span class="op">=</span> <span class="bu">zip</span>(<span class="op">*</span>data2)</span>
-<span id="cb8-4"><a href="#cb8-4"></a>fig, ax1 <span class="op">=</span> plt.subplots()</span>
-<span id="cb8-5"><a href="#cb8-5"></a></span>
-<span id="cb8-6"><a href="#cb8-6"></a><span class="co"># Plotting the fidelity vs. duration (main line)</span></span>
-<span id="cb8-7"><a href="#cb8-7"></a>ax1.set_xlabel(<span class="st">"Duration"</span>)</span>
-<span id="cb8-8"><a href="#cb8-8"></a>ax1.set_ylabel(<span class="st">"Fidelity"</span>)</span>
-<span id="cb8-9"><a href="#cb8-9"></a>ax1.plot(durations_sorted, fidelities_sorted, label<span class="op">=</span><span class="st">"Fidelity"</span>)</span>
-<span id="cb8-10"><a href="#cb8-10"></a>ax1.tick_params(axis<span class="op">=</span><span class="st">"y"</span>)</span>
-<span id="cb8-11"><a href="#cb8-11"></a></span>
-<span id="cb8-12"><a href="#cb8-12"></a><span class="co"># Setting the secondary x-axis for the size of QFT</span></span>
-<span id="cb8-13"><a href="#cb8-13"></a>ax2 <span class="op">=</span> ax1.twiny()</span>
-<span id="cb8-14"><a href="#cb8-14"></a>ax2.set_xlabel(<span class="st">"Size of QFT"</span>)</span>
-<span id="cb8-15"><a href="#cb8-15"></a>ax2.set_xticks(durations_sorted)</span>
-<span id="cb8-16"><a href="#cb8-16"></a>ax2.set_xticklabels(sizes_sorted)</span>
-<span id="cb8-17"><a href="#cb8-17"></a>ax2.tick_params(axis<span class="op">=</span><span class="st">"x"</span>)</span>
-<span id="cb8-18"><a href="#cb8-18"></a></span>
-<span id="cb8-19"><a href="#cb8-19"></a><span class="co"># Adjusting the reference line calculation</span></span>
-<span id="cb8-20"><a href="#cb8-20"></a>unique_sizes <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(sizes_sorted))</span>
-<span id="cb8-21"><a href="#cb8-21"></a>reference_y_total <span class="op">=</span> []</span>
-<span id="cb8-22"><a href="#cb8-22"></a>duration_samples_total <span class="op">=</span> []</span>
-<span id="cb8-23"><a href="#cb8-23"></a></span>
-<span id="cb8-24"><a href="#cb8-24"></a><span class="cf">for</span> size <span class="kw">in</span> unique_sizes:</span>
-<span id="cb8-25"><a href="#cb8-25"></a>    min_duration <span class="op">=</span> <span class="bu">min</span>(</span>
-<span id="cb8-26"><a href="#cb8-26"></a>        [</span>
-<span id="cb8-27"><a href="#cb8-27"></a>            duration</span>
-<span id="cb8-28"><a href="#cb8-28"></a>            <span class="cf">for</span> size_curr, duration <span class="kw">in</span> <span class="bu">zip</span>(sizes_sorted, durations_sorted)</span>
-<span id="cb8-29"><a href="#cb8-29"></a>            <span class="cf">if</span> size_curr <span class="op">==</span> size</span>
-<span id="cb8-30"><a href="#cb8-30"></a>        ]</span>
-<span id="cb8-31"><a href="#cb8-31"></a>    )</span>
-<span id="cb8-32"><a href="#cb8-32"></a>    max_duration <span class="op">=</span> <span class="bu">max</span>(</span>
-<span id="cb8-33"><a href="#cb8-33"></a>        [</span>
-<span id="cb8-34"><a href="#cb8-34"></a>            duration</span>
-<span id="cb8-35"><a href="#cb8-35"></a>            <span class="cf">for</span> size_curr, duration <span class="kw">in</span> <span class="bu">zip</span>(sizes_sorted, durations_sorted)</span>
-<span id="cb8-36"><a href="#cb8-36"></a>            <span class="cf">if</span> size_curr <span class="op">==</span> size</span>
-<span id="cb8-37"><a href="#cb8-37"></a>        ]</span>
-<span id="cb8-38"><a href="#cb8-38"></a>    )</span>
-<span id="cb8-39"><a href="#cb8-39"></a>    duration_samples <span class="op">=</span> np.linspace(min_duration, max_duration, <span class="dv">100</span>)</span>
-<span id="cb8-40"><a href="#cb8-40"></a>    reference_y <span class="op">=</span> [</span>
-<span id="cb8-41"><a href="#cb8-41"></a>        np.exp(<span class="op">-</span>size <span class="op">*</span> duration <span class="op">/</span> (T1 <span class="op">+</span> T2)) <span class="cf">for</span> duration <span class="kw">in</span> duration_samples</span>
-<span id="cb8-42"><a href="#cb8-42"></a>    ]</span>
-<span id="cb8-43"><a href="#cb8-43"></a></span>
-<span id="cb8-44"><a href="#cb8-44"></a>    reference_y_total.extend(reference_y)</span>
-<span id="cb8-45"><a href="#cb8-45"></a>    duration_samples_total.extend(duration_samples)</span>
-<span id="cb8-46"><a href="#cb8-46"></a></span>
-<span id="cb8-47"><a href="#cb8-47"></a>ax1.plot(</span>
-<span id="cb8-48"><a href="#cb8-48"></a>    duration_samples_total,</span>
-<span id="cb8-49"><a href="#cb8-49"></a>    reference_y_total,</span>
-<span id="cb8-50"><a href="#cb8-50"></a>    label<span class="op">=</span><span class="st">"e^{-nD / (T_1+T_2)}"</span>,</span>
-<span id="cb8-51"><a href="#cb8-51"></a>    linestyle<span class="op">=</span><span class="st">"--"</span>,</span>
-<span id="cb8-52"><a href="#cb8-52"></a>)</span>
-<span id="cb8-53"><a href="#cb8-53"></a></span>
-<span id="cb8-54"><a href="#cb8-54"></a></span>
-<span id="cb8-55"><a href="#cb8-55"></a>plt.title(<span class="st">"n-QFT Fidelity vs Duration with QFT Size Reference"</span>)</span>
-<span id="cb8-56"><a href="#cb8-56"></a>plt.tight_layout()  <span class="co"># Adjust layout to prevent overlap</span></span>
-<span id="cb8-57"><a href="#cb8-57"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
+<p>After running the script, install necessary dependencies:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">apt</span> install openresolv</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">apt-get</span> install iptables-persistent</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Acquiring the VPN Configuration</strong>:</p>
+<ul>
+<li>Go to <a href="https://airvpn.org/linux/wireguard/terminal/">AirVPN’s WireGuard configuration generator</a>.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="figures/image-19.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2: Generating AirVPN WireGuard configuration.</figcaption>
 </figure>
 </div>
+<ul>
+<li>Select Linux, the WireGuard protocol, and your preferred server location. This will generate a *.conf file with your VPN configuration.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode conf code-with-copy"><code class="sourceCode toml"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Interface]</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">Address</span> <span class="op">=</span> <span class="fl">10.178</span><span class="dt">.17.78</span><span class="er">,</span><span class="dt">fd7d</span><span class="er">:</span><span class="dt">76ee</span><span class="er">:</span><span class="dt">e68f</span><span class="er">:</span><span class="dt">a993</span><span class="er">:</span><span class="dt">124c</span><span class="er">:</span><span class="dt">7d1d</span><span class="er">:</span><span class="dt">869c</span><span class="er">:</span><span class="dt">84e7</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">PrivateKey</span> <span class="op">=</span> <span class="op">[</span><span class="er">PRIVATE_KEY</span><span class="op">]</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="dt">MTU</span> <span class="op">=</span> <span class="dv">1320</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="dt">DNS</span> <span class="op">=</span> <span class="fl">10.128</span><span class="dt">.0.1</span><span class="er">,</span> <span class="dt">fd7d</span><span class="er">:</span><span class="dt">76ee</span><span class="er">:</span><span class="dt">e68f</span><span class="er">:</span><span class="dt">a993</span><span class="er">::</span><span class="dt">1</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[Peer]</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="dt">PublicKey</span> <span class="op">=</span> <span class="dt">PyLCXAQT8KkM4T</span><span class="er">+</span><span class="dt">dUsOQfn</span><span class="er">+</span><span class="dt">Ub3pGxfGlxkIApuig</span><span class="er">+</span><span class="dt">hk</span><span class="op">=</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">PresharedKey</span> <span class="op">=</span> <span class="op">[</span><span class="er">PRIVATE_KEY</span><span class="op">]</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="dt">Endpoint</span> <span class="op">=</span> <span class="dt">america3.vpn.airdns.org</span><span class="er">:</span><span class="dt">1637</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="dt">AllowedIPs</span> <span class="op">=</span> <span class="fl">0.0</span><span class="dt">.0.0</span><span class="er">/</span><span class="dt">0</span><span class="er">,::/</span><span class="dt">0</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="dt">PersistentKeepalive</span> <span class="op">=</span> <span class="dv">15</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Configuring WireGuard with AirVPN</strong>:</p>
+<ul>
+<li>Check your current public IP address:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> ifconfig.me</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Update the WireGuard configuration with AirVPN’s details (e.g., <code>wg0.conf</code>, but you can use any name if you are setting up multiple VPNs on the same LXC):</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nano</span> /etc/wireguard/wg0.conf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Apply the new configuration and restart WireGuard:</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">wg-quick</span> down wg0</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">wg-quick</span> up wg0</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">wg</span> show</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Confirm the VPN is working by checking your new public IP address:</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> ifconfig.me</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You should observe an IP address different from the one initially confirmed, indicating successful VPN integration.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-20.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3: Verifying WireGuard VPN functionality</figcaption>
+</figure>
+</div></li>
+</ol>
+</section>
+<section id="qbittorrent-lxc" class="level2">
+<h2 class="anchored" data-anchor-id="qbittorrent-lxc">qBittorrent LXC</h2>
+<p>Next, set up qBittorrent LXC for secure torrenting through the VPN:</p>
+<ol type="1">
+<li><p><strong>Installing qBittorrent LXC</strong>: Start by executing the script on your host machine and accept the default settings.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bash</span> <span class="at">-c</span> <span class="st">"</span><span class="va">$(</span><span class="fu">wget</span> <span class="at">-qLO</span> <span class="at">-</span> https://github.com/tteck/Proxmox/raw/main/ct/qbittorrent.sh<span class="va">)</span><span class="st">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4: Launching the qBittorrent LXC setup.</figcaption>
+</figure>
+</div>
+<p>After installation, access qBittorrent through your web browser at the provided URL:</p>
+<pre class="shell"><code>qBittorrent should be reachable by going to the following URL.
+         http://192.168.0.227:8090</code></pre></li>
+</ol>
+</section>
+<section id="network-bridge" class="level2">
+<h2 class="anchored" data-anchor-id="network-bridge">Network bridge</h2>
+<p>Creating a network bridge in Proxmox ensures direct communication between the WireGuard and qBittorrent containers:</p>
+<ol type="1">
+<li><p><strong>Creating a Proxmox Network Bridge</strong>:</p>
+<ul>
+<li>Start by creating a network bridge in the Proxmox interface, which may vary based on your setup.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-6.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6: Configuring a new network bridge in Proxmox.</figcaption>
+</figure>
+</div>
+<ul>
+<li>Apply the changes to activate the new network bridge.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-5.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 7: Finalizing network bridge setup.</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Integrating LXCs with the Network Bridge</strong>:</p>
+<ul>
+<li><p>Assign the new bridge as a network device for both the WireGuard and qBittorrent LXCs, setting static IP addresses on this new subnet:</p>
+<ul>
+<li>WireGuard LXC: <code>10.10.10.1/24</code></li>
+<li>qBittorrent LXC: <code>10.10.10.2/24</code></li>
+</ul></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-7.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 8: Assigning the network bridge to LXCs.</figcaption>
+</figure>
+</div>
+<ul>
+<li>Test the integration by pinging the qBittorrent LXC from the WireGuard LXC.</li>
+</ul>
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> 10.10.10.2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-8.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 9: Verifying connectivity between LXCs.</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Gateway Configuration</strong>:</p>
+<ul>
+<li><strong>WireGuard LXC</strong>:
+<ul>
+<li>Enable IP forwarding and establish NAT rules:</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"net.ipv4.ip_forward=1"</span> <span class="kw">|</span> <span class="fu">tee</span> <span class="at">-a</span> /etc/sysctl.conf</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">sysctl</span> <span class="at">-p</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="ex">iptables</span> <span class="at">-t</span> nat <span class="at">-A</span> POSTROUTING <span class="at">-o</span> wg0 <span class="at">-j</span> MASQUERADE</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p>Save the iptables configuration to persist across reboots:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">netfilter-persistent</span> save</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+<li><strong>qBittorrent LXC</strong>:
+<ul>
+<li>Define the WireGuard LXC as the default gateway. Update <code>/etc/network/interfaces</code> with the gateway and DNS settings.</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">auto</span> lo</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">iface</span> lo inet loopback</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="ex">auto</span> eth0</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">iface</span> eth0 inet static</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="ex">address</span> 192.168.0.227 <span class="co"># [Your qBittorrent LXC's static IP]</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="ex">netmask</span> 255.255.255.0</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="ex">auto</span> eth1</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="ex">iface</span> eth1 inet static</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="ex">address</span> 10.10.10.2/24</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="ex">netmask</span> 255.255.255.0</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="ex">gateway</span> 10.10.10.1</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="ex">dns-nameservers</span> 1.1.1.1</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="ex">post-up</span> ip route add default via 10.10.10.1 dev eth1</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    <span class="ex">post-up</span> ip route del default via 192.168.0.1 dev eth0 <span class="kw">||</span> <span class="fu">true</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
 </div>
 </div>
+<div class="callout-body-container callout-body">
+<p>I recommend using a static IP address for the qBittorrent LXC as DHCP can cause issues with the setup’s persistence across reboots.</p>
+</div>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-10.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 10: Default routing through the VPN bridge.</figcaption>
+</figure>
+</div>
+<ul>
+<li>Restart network services to apply changes.</li>
+</ul></li>
+<li>Confirm the successful gateway configuration by verifying the IP address is now resolved through the VPN:</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ping</span> <span class="at">-c</span> 4 google.com  <span class="co"># Test DNS resolution</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> ifconfig.me  <span class="co"># Should return the WireGuard IP</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>In case of any configuration issues, try bypassing Proxmox’s configuration checks:</li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">touch</span> /.pve-ignore.resolv.conf</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">touch</span> /etc/network/.pve-ignore.interfaces</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ol>
+</section>
+<section id="qbittorrent-client-configuration" class="level2">
+<h2 class="anchored" data-anchor-id="qbittorrent-client-configuration">qBittorrent client configuration</h2>
+<p>Finally, configure the qBittorrent client to ensure secure torrenting through the VPN:</p>
+<ol type="1">
+<li><p><strong>Port Forwarding with AirVPN</strong>: Visit <a href="https://airvpn.org/ports/">AirVPN’s port forwarding section</a> to obtain a port to be forwarded through the VPN. This step is crucial for the qBittorrent client to establish direct connections with peers.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-13.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 6: Acquiring a forwarded port from AirVPN.</figcaption>
+</figure>
+</div></li>
+<li><p><strong>qBittorrent WebUI</strong>:</p>
+<ul>
+<li>Ensure the security of your qBittorrent interface by setting a strong password.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-4.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 5: Configuring the webgui password for qBittorrent.*</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Configuring the Listening Port</strong>: Access the settings in the qBittorrent WebUI and enter the listening port you received from AirVPN.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-14.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 7: Setting the listening port in qBittorrent.</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Network Interface Binding</strong>:</p>
+<ul>
+<li>Bind qBittorrent to the network interface (<code>eth1</code>) and IP address (<code>10.10.10.2</code>) corresponding to the VPN connection to ensure all traffic goes through the VPN.</li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-12.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 8: Binding qBittorrent to a specific network interface.</figcaption>
+</figure>
+</div></li>
+</ol>
+<ul>
+<li>Remember to click <strong>Save</strong> to apply your changes.</li>
+</ul>
+</section>
+</section>
+<section id="verification" class="level1">
+<h1>Verification</h1>
+<p>Follow these steps to confirm everything is functioning as intended:</p>
+<ol type="1">
+<li><p><strong>Torrent Address Detection</strong>: Use <a href="https://ipleak.net/">ipleak.net</a> to check that the IP address of your torrent client matches that of the VPN.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-15.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 9: Verifying the VPN IP address with ipleak.net.</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Torrent Download Test</strong>: For a reliable test, I use a latest <a href="http://mirror.cs.pitt.edu/archlinux/iso/latest/archlinux-2024.03.01-x86_64.iso.torrent">Arch Linux ISO torrent</a> supplied by my university. Successful downloading confirms that your qBittorrent client is properly communicating with peers through the VPN. <img src="figures/image-17.png" class="img-fluid" alt="Figure 10: Confirming successful torrent download."></p></li>
+</ol>
+<p>With these steps completed, your LXC container should now be securely integrated with a VPN.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

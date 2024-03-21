@@ -10,28 +10,17 @@
 <atom:link href="https://blog.evm9.dev/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog about quantum computing, programming, and other things.</description>
 <generator>quarto-1.4.551</generator>
-<lastBuildDate>Thu, 19 Oct 2023 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 20 Mar 2024 00:00:00 GMT</lastBuildDate>
 <item>
-  <title>Second Post</title>
+  <title>Configuring an LXC container with an external VPN</title>
   <dc:creator>Evan McKinney</dc:creator>
-  <link>https://blog.evm9.dev/posts/depth/</link>
-  <description><![CDATA[ This is the description, using Qiskit noise models something something ]]></description>
-  <category>jupyter</category>
-  <category>Qiskit</category>
-  <guid>https://blog.evm9.dev/posts/depth/</guid>
-  <pubDate>Thu, 19 Oct 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.evm9.dev/posts/depth/figures/cover.png" medium="image" type="image/png" height="103" width="144"/>
-</item>
-<item>
-  <title>First Post</title>
-  <dc:creator>Evan McKinney</dc:creator>
-  <link>https://blog.evm9.dev/posts/asymptote/</link>
-  <description><![CDATA[ This is the description ]]></description>
-  <category>jupyter</category>
-  <category>Qiskit</category>
-  <guid>https://blog.evm9.dev/posts/asymptote/</guid>
-  <pubDate>Wed, 18 Oct 2023 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.evm9.dev/posts/asymptote/figures/cover.png" medium="image" type="image/png" height="96" width="144"/>
+  <link>https://blog.evm9.dev/posts/prox_vpn/</link>
+  <description><![CDATA[ This guide aims to seamlessly integrate your LXC container with an external VPN service, enhancing privacy and security for your containerized applications. ]]></description>
+  <category>proxmox</category>
+  <category>devops</category>
+  <guid>https://blog.evm9.dev/posts/prox_vpn/</guid>
+  <pubDate>Wed, 20 Mar 2024 00:00:00 GMT</pubDate>
+  <media:content url="https://blog.evm9.dev/posts/prox_vpn/figures/cover.png" medium="image" type="image/png" height="108" width="144"/>
 </item>
 </channel>
 </rss>
