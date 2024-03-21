@@ -1,7 +1,7 @@
 ---
 title: Configuring an LXC container with an external VPN
 description: |
-    This guide aims to seamlessly integrate your LXC container with an external VPN service, enhancing privacy and security for your containerized applications.
+    This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications.
 categories: [proxmox, devops]
 date: 3/20/2024
 code-line-numbers: false
