@@ -119,11 +119,11 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
 1. **Creating a Proxmox Network Bridge**:
    - Start by creating a network bridge in the Proxmox interface, which may vary based on your setup.
 
-    ![Figure 6: Configuring a new network bridge in Proxmox.](figures/image-6.png)  
+    ![Figure 5: Configuring a new network bridge in Proxmox.](figures/image-6.png)  
 
     - Apply the changes to activate the new network bridge.
 
-    ![Figure 7: Finalizing network bridge setup.](figures/image-5.png)  
+    ![Figure 6: Finalizing network bridge setup.](figures/image-5.png)  
 
 2. **Integrating LXCs with the Network Bridge**:
    - Assign the new bridge as a network device for both the WireGuard and qBittorrent LXCs, setting static IP addresses on this new subnet:
@@ -131,7 +131,7 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
      - WireGuard LXC: `10.10.10.1/24`
      - qBittorrent LXC: `10.10.10.2/24`
 
-    ![Figure 8: Assigning the network bridge to LXCs.](figures/image-7.png)  
+    ![Figure 7: Assigning the network bridge to LXCs.](figures/image-7.png)  
 
    - Test the integration by pinging the qBittorrent LXC from the WireGuard LXC.
 
@@ -139,7 +139,7 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
     ping 10.10.10.2
     ```
 
-    ![Figure 9: Verifying connectivity between LXCs.](figures/image-8.png)  
+    ![Figure 8: Verifying connectivity between LXCs.](figures/image-8.png)  
 
 3. **Gateway Configuration**:
 
@@ -181,7 +181,7 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
 I recommend using a static IP address for the qBittorrent LXC as DHCP can cause issues with the setup's persistence across reboots.
 :::
 
-        ![Figure 10: Default routing through the VPN bridge.](figures/image-10.png)  
+        ![Figure 9: Default routing through the VPN bridge.](figures/image-10.png)  
 
         - Restart network services to apply changes.
 
@@ -205,21 +205,21 @@ Finally, configure the qBittorrent client to ensure secure torrenting through th
 
 1. **Port Forwarding with AirVPN**: Visit [AirVPN's port forwarding section](https://airvpn.org/ports/) to obtain a port to be forwarded through the VPN. This step is crucial for the qBittorrent client to establish direct connections with peers.
 
-    ![Figure 6: Acquiring a forwarded port from AirVPN.](figures/image-13.png)  
+    ![Figure 10: Acquiring a forwarded port from AirVPN.](figures/image-13.png)  
 
 2. **qBittorrent WebUI**:
    - Ensure the security of your qBittorrent interface by setting a strong password.
 
-    ![Figure 5: Configuring the webgui password for qBittorrent.](figures/image-4.png)  
+    ![Figure 11: Configuring the webgui password for qBittorrent.](figures/image-4.png)  
 
 3. **Configuring the Listening Port**: Access the settings in the qBittorrent WebUI and enter the listening port you received from AirVPN. 
 
-    ![Figure 7: Setting the listening port in qBittorrent.](figures/image-14.png)  
+    ![Figure 12: Setting the listening port in qBittorrent.](figures/image-14.png)  
 
 4. **Network Interface Binding**:
    - Bind qBittorrent to the network interface (`eth1`) and IP address (`10.10.10.2`) corresponding to the VPN connection to ensure all traffic goes through the VPN.
 
-    ![Figure 8: Binding qBittorrent to a specific network interface.](figures/image-12.png)  
+    ![Figure 13: Binding qBittorrent to a specific network interface.](figures/image-12.png)  
 
 - Remember to click **Save** to apply your changes.
 
@@ -229,9 +229,10 @@ Follow these steps to confirm everything is functioning as intended:
 
 1. **Torrent Address Detection**: Use [ipleak.net](https://ipleak.net/) to check that the IP address of your torrent client matches that of the VPN.
 
-    ![Figure 9: Verifying the VPN IP address with ipleak.net.](figures/image-15.png)  
+    ![Figure 14: Verifying the VPN IP address with ipleak.net.](figures/image-15.png)  
 
 2. **Torrent Download Test**: For a reliable test, I use a latest [Arch Linux ISO torrent](http://mirror.cs.pitt.edu/archlinux/iso/latest/archlinux-2024.03.01-x86_64.iso.torrent) supplied by my university. Successful downloading confirms that your qBittorrent client is properly communicating with peers through the VPN.
-    ![Figure 10: Confirming successful torrent download.](figures/image-17.png)  
+
+    ![Figure 15: Confirming successful torrent download.](figures/image-17.png)  
 
 With these steps completed, your LXC container should now be securely integrated with a VPN.
