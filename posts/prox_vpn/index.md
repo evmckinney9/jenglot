@@ -151,9 +151,9 @@ Creating a network bridge in Proxmox ensures direct communication between the Wi
         iptables -t nat -A POSTROUTING -o wg0 -j MASQUERADE
         ```
         - Save the iptables configuration to persist across reboots:
-            ```bash
-            netfilter-persistent save
-            ```
+        ```bash
+        netfilter-persistent save
+        ```
 
     - **qBittorrent LXC**:
         - Define the WireGuard LXC as the default gateway. Update `/etc/network/interfaces` with the gateway and DNS settings.
