@@ -340,7 +340,7 @@ Warning
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-6.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 6: Configuring a new network bridge in Proxmox.</figcaption>
+<figcaption>Figure 5: Configuring a new network bridge in Proxmox.</figcaption>
 </figure>
 </div>
 <ul>
@@ -349,7 +349,7 @@ Warning
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-5.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 7: Finalizing network bridge setup.</figcaption>
+<figcaption>Figure 6: Finalizing network bridge setup.</figcaption>
 </figure>
 </div></li>
 <li><p><strong>Integrating LXCs with the Network Bridge</strong>:</p>
@@ -363,7 +363,7 @@ Warning
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-7.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 8: Assigning the network bridge to LXCs.</figcaption>
+<figcaption>Figure 7: Assigning the network bridge to LXCs.</figcaption>
 </figure>
 </div>
 <ul>
@@ -373,7 +373,7 @@ Warning
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-8.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 9: Verifying connectivity between LXCs.</figcaption>
+<figcaption>Figure 8: Verifying connectivity between LXCs.</figcaption>
 </figure>
 </div></li>
 <li><p><strong>Gateway Configuration</strong>:</p>
@@ -425,7 +425,7 @@ Tip
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-10.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 10: Default routing through the VPN bridge.</figcaption>
+<figcaption>Figure 9: Default routing through the VPN bridge.</figcaption>
 </figure>
 </div>
 <ul>
@@ -450,7 +450,7 @@ Tip
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-13.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 6: Acquiring a forwarded port from AirVPN.</figcaption>
+<figcaption>Figure 10: Acquiring a forwarded port from AirVPN.</figcaption>
 </figure>
 </div></li>
 <li><p><strong>qBittorrent WebUI</strong>:</p>
@@ -460,14 +460,14 @@ Tip
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-4.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 5: Configuring the webgui password for qBittorrent.</figcaption>
+<figcaption>Figure 11: Configuring the webgui password for qBittorrent.</figcaption>
 </figure>
 </div></li>
 <li><p><strong>Configuring the Listening Port</strong>: Access the settings in the qBittorrent WebUI and enter the listening port you received from AirVPN.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-14.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 7: Setting the listening port in qBittorrent.</figcaption>
+<figcaption>Figure 12: Setting the listening port in qBittorrent.</figcaption>
 </figure>
 </div></li>
 <li><p><strong>Network Interface Binding</strong>:</p>
@@ -477,7 +477,7 @@ Tip
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-12.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 8: Binding qBittorrent to a specific network interface.</figcaption>
+<figcaption>Figure 13: Binding qBittorrent to a specific network interface.</figcaption>
 </figure>
 </div></li>
 </ol>
@@ -494,10 +494,16 @@ Tip
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="figures/image-15.png" class="img-fluid figure-img"></p>
-<figcaption>Figure 9: Verifying the VPN IP address with ipleak.net.</figcaption>
+<figcaption>Figure 14: Verifying the VPN IP address with ipleak.net.</figcaption>
 </figure>
 </div></li>
-<li><p><strong>Torrent Download Test</strong>: For a reliable test, I use a latest <a href="http://mirror.cs.pitt.edu/archlinux/iso/latest/archlinux-2024.03.01-x86_64.iso.torrent">Arch Linux ISO torrent</a> supplied by my university. Successful downloading confirms that your qBittorrent client is properly communicating with peers through the VPN. <img src="figures/image-17.png" class="img-fluid" alt="Figure 10: Confirming successful torrent download."></p></li>
+<li><p><strong>Torrent Download Test</strong>: For a reliable test, I use a latest <a href="http://mirror.cs.pitt.edu/archlinux/iso/latest/archlinux-2024.03.01-x86_64.iso.torrent">Arch Linux ISO torrent</a> supplied by my university. Successful downloading confirms that your qBittorrent client is properly communicating with peers through the VPN.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image-17.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 15: Confirming successful torrent download.</figcaption>
+</figure>
+</div></li>
 </ol>
 <p>With these steps completed, your LXC container should now be securely integrated with a VPN.</p>
 
