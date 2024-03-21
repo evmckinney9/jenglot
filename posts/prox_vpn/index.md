@@ -210,7 +210,7 @@ Finally, configure the qBittorrent client to ensure secure torrenting through th
 2. **qBittorrent WebUI**:
    - Ensure the security of your qBittorrent interface by setting a strong password.
 
-    ![Figure 5: Configuring the webgui password for qBittorrent.*](figures/image-4.png)  
+    ![Figure 5: Configuring the webgui password for qBittorrent.](figures/image-4.png)  
 
 3. **Configuring the Listening Port**: Access the settings in the qBittorrent WebUI and enter the listening port you received from AirVPN. 
 
