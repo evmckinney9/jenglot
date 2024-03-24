@@ -17,7 +17,7 @@
   <link>https://blog.evm9.dev/posts/prox_vpn/</link>
   <description><![CDATA[ This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications. ]]></description>
   <category>proxmox</category>
-  <category>devops</category>
+  <category>sysops</category>
   <guid>https://blog.evm9.dev/posts/prox_vpn/</guid>
   <pubDate>Wed, 20 Mar 2024 00:00:00 GMT</pubDate>
   <media:content url="https://blog.evm9.dev/posts/prox_vpn/figures/cover.png" medium="image" type="image/png" height="108" width="144"/>
