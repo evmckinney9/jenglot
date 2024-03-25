@@ -11,7 +11,7 @@
     "href": "posts/prox_vpn/index.html",
     "title": "Configuring an LXC container with an external VPN",
     "section": "",
-    "text": "This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications.\n\nProxmox Virtual Environment: A server management platform that allows you to deploy, manage, and monitor LXC containers. For more information visit Proxmox VE.\nTTeck’s Proxmox Helper Scripts: These scripts make it easier to create and manage LXC containers. Learn more here.\n\nIn this guide, we will configure a qBittorrent LXC container to use WireGuard VPN as its network gateway. I selected AirVPN as the VPN provider due to its support for peer-to-peer (P2P) connections and port forwarding capabilities. However, the concepts and steps outlined here can be adapted to other VPN services and applications according to your needs.\n\n\n\n\n\n\nWarning\n\n\n\nPlease use this guide responsibly. I’m not an expert and cannot guarantee the security of your setup."
+    "text": "This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications.\nIn this guide, we will configure a qBittorrent LXC container to use WireGuard VPN as its network gateway. I selected AirVPN as the VPN provider due to its support for peer-to-peer (P2P) connections and port forwarding capabilities. However, the concepts and steps outlined here can be adapted to other VPN services and applications according to your needs."
   },
   {
     "objectID": "posts/prox_vpn/index.html#wireguard-lxc",
