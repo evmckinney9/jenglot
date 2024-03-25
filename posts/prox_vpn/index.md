@@ -7,8 +7,6 @@ date: 3/20/2024
 code-line-numbers: false
 ---
 
-# Objective
-
 This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications.
 
 - **Proxmox Virtual Environment**: A server management platform that allows you to deploy, manage, and monitor LXC containers. For more information visit [Proxmox VE](https://www.proxmox.com/proxmox-ve).
