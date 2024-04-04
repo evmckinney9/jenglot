@@ -1,14 +1,12 @@
 ---
-title: Precompiling Rust for Python Wheel Distribution
+title: Building Python Wheels with Rust Extensions Using GitHub Actions
 description: |
     This post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user's machine.
 
 categories: [devops, python, rust, github]
-date: 4/03/2024
-draft: true
+date: 4/04/2024
 ---
-
-The goal of this post is to document the updates I made to my Python project template to **support creation of packages with Rust extensions that are installable via pip, without the need for a Rust compiler on the installation target**. Utilizing GitHub Actions and cibuildwheel, I automate the creation of wheels across multiple platforms. 
+The goal of this post is to document the updates I made to my Python project template to **support creation of packages with Rust extensions that are installable via pip, without the need for a Rust compiler on the installation target**. Utilizing GitHub Actions and `cibuildwheel`, I automate the creation of wheels across multiple platforms. 
 
 Everything that follows has been implemented in my [Python project template](https://github.com/evmckinney9/python-template).
 
@@ -16,20 +14,21 @@ ___
 
 - **GitHub Actions**: Automates workflows, enabling CI/CD for project builds and tests. Learn more through [GitHub-hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners) and [building/testing Python](https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python).
 
-- **Rust Learning**: Enhance your Rust knowledge with the [Rust Book](https://doc.rust-lang.org/stable/book/) and [Comprehensive Rust by Google](https://google.github.io/comprehensive-rust/). Practice with [Rustlings exercises](https://github.com/rust-lang/rustlings), and explore resources like [Awesome Rust](https://github.com/rust-unofficial/awesome-rust) and [Rust Algorithms](https://github.com/TheAlgorithms/Rust).
+- **Learning Rust**: Improve your Rust knowledge with the [Rust Book](https://doc.rust-lang.org/stable/book/) and [Comprehensive Rust by Google](https://google.github.io/comprehensive-rust/). Practice with [Rustlings exercises](https://github.com/rust-lang/rustlings), and explore resources like [Awesome Rust](https://github.com/rust-unofficial/awesome-rust) and [Rust Algorithms](https://github.com/TheAlgorithms/Rust).
 
-- **Rust and Python Integration**: Utilize [PyO3](https://pyo3.rs) for creating Python bindings for Rust code. [Maturin](https://www.maturin.rs/) is another tool for building Python packages from Rust extensions, although not used in this project. 
+- **Rust and Python Integration**: Utilize [PyO3](https://pyo3.rs) for creating Python bindings for Rust code. [Maturin](https://www.maturin.rs/) is a popular tool for building Python packages from Rust extensions, although not used in this project. 
   - [`setuptools-rust`](https://github.com/PyO3/setuptools-rust) is an add-on for `setuptools` which is more flexibile but requires more configuration than `maturin`.
   - [Qiskit Accelerate](https://github.com/Qiskit/qiskit/tree/main/crates/accelerate), alongside its [performance insights](https://medium.com/qiskit/new-weve-started-using-rust-in-qiskit-for-better-performance-a3676433ca8c), illustrates the benefits of Rust and Python integration in a production environment.
 
+___
 
 # Setup Python with Rust
 
-Start with a Python project template that's prepared for Rust integration. Refer to [PyO3's documentation](https://pyo3.rs) for instructions on wrapping Rust for Python, with the [setuptools-rust starter](https://github.com/PyO3/pyo3/tree/main/examples/setuptools-rust-starter) as a helpful resource.
+Start with an existing Python project template. In the next steps I used [PyO3's documentation](https://pyo3.rs) for instructions on wrapping Rust for Python, with the [setuptools-rust starter](https://github.com/PyO3/pyo3/tree/main/examples/setuptools-rust-starter) as a helpful resource.
 
 ## Modify Package Structure
 
-1. **Update `pyproject.toml`**: Add `"setuptools_rust"` to the build system requirements, enabling Rust extension builds within your Python project. For detailed guidance, consult the [Setuptools Rust documentation](https://setuptools-rust.readthedocs.io/en/latest/).
+1. **Update `pyproject.toml`**: Add `"setuptools-rust"` to the build system requirements, enabling Rust extension builds within your Python project. For detailed guidance, consult the [Setuptools Rust documentation](https://setuptools-rust.readthedocs.io/en/latest/).
 
     ```toml
     [build-system]
@@ -136,13 +135,13 @@ The process of integrating Rust functions into your Python project involves a fe
 
 Verifying the integration involves a straightforward process:
 
-1. **Instantiate and Build**: After setting up the template and implementing the Rust functions, create a new repository from the template and clone it to your development environment. Iam using Ubuntu in WSL2, with Rust already installed.
+1. **Instantiate and Build**: After setting up the template and implementing the Rust functions, create a new repository from the template and clone it to your development environment. I am using Ubuntu in WSL2, with Rust already installed.
 
     ![Figure 1: Creating a new repository from the template.](figures/image1.png)  
 
 2. **Build and Test**: Use the `make init` command to establish a virtual environment, install the project with all dependencies, and run tests to ensure successful integration.
 
-    ```bash
+    ```{.bash code-line-numbers="false"}
     evmck@Desktop ~/template_demo
     $ make init
     ```
@@ -155,15 +154,15 @@ Verifying the integration involves a straightforward process:
 Unsuprisingly, attempting to install the package on an environment without Rust results in a build failure.
 
 ```{.bash code-line-numbers="false"}
-evmck@Evan-Desktop ~/Downloads/windows_rust_demo
-$ pip install -e git+https://github.com/evmckinney9/rust_demo#egg=rust_demo
+evmck@Evan-Desktop ~/Downloads/template_demo
+$ pip install -e git+https://github.com/evmckinney9/template_demo#egg=template_demo
 ```
 The error encountered:
 
 ```{.text code-line-numbers="false"}
-ERROR: Failed building editable for rust_demo
-Failed to build rust_demo
-ERROR: Could not build wheels for rust_demo, which is required to install pyproject.toml-based projects 
+ERROR: Failed building editable for template_demo
+Failed to build template_demo
+ERROR: Could not build wheels for template_demo, which is required to install pyproject.toml-based projects 
 (.venv) 
 ```
 This issue clarifies the importance of modifying the project's release strategy to enable distribution to machines without Rust.
@@ -173,11 +172,17 @@ This standard project setup leaves us with a clean modular workspace ready for f
 
 # Distributing Wheels
 
-GitHub Actions and cibuildwheel offer a robust solution for automating generation of wheels compatible with multiple platforms. Detailed guidance on setting up workflows can be found in the [GitHub Actions official documentation](https://docs.github.com/en/actions) and information on [github-hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners).
+GitHub Actions and `cibuildwheel` offer a robust solution for automating generation of wheels compatible with multiple platforms. Detailed guidance on setting up workflows can be found in the [GitHub Actions official documentation](https://docs.github.com/en/actions) and information on [Github-hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners).
+
+Here are two example projects that use `cibuildwheel` with `setuptools-rust` I found helpful when gluing everything together:
+
+- **Polaroid**: A [fast image processing library](https://github.com/daggy1234/polaroid/blob/main/.github/workflows/publish.yml)
+- **Etebase**: An [end-to-end encryption service](https://github.com/etesync/etebase-py/blob/master/.github/workflows/manual.yml)
+
 
 ## Building Wheels for Multiple Platforms
 
-Configure a GitHub Action workflow to employ cibuildwheel, simplifying the process of generating wheels that cover Linux, macOS (including both Intel and Apple Silicon), and Windows platforms. For more information on cibuildwheel, refer to the [official documentation](https://cibuildwheel.pypa.io/en/stable/). The following [example](https://cibuildwheel.pypa.io/en/stable/setup/#github-actions) will be my starting point:
+Configure a GitHub Action workflow with `cibuildwheel`, which simplifies the process of generating wheels for Linux, macOS (including both Intel and Apple Silicon), and Windows platforms. For more information, refer to the [`cibuildwheel` documentation](https://cibuildwheel.pypa.io/en/stable/). The following [example](https://cibuildwheel.pypa.io/en/stable/setup/#github-actions) will be my starting point:
 
 ```yaml
 name: Build
@@ -205,9 +210,7 @@ jobs:
           path: ./wheelhouse/*.whl
 ```
 
-This configuration automates the wheel building process, ensuring compatibility across different operating systems.
-
-My apologies for that oversight. Let's include the reference to the pre-installed tools in the revised section:
+This configuration will build wheels for all specified platforms in the `matrix.os` list, with the resulting wheels stored as artifacts. The `cibuildwheel` action will automatically detect the Python version and build the wheels accordingly.
 
 ::: {.callout-note}
 GitHub-hosted runners already have Python and Rust [pre-installed](https://github.com/actions/runner-images#available-images), but for Linux builds, an additional step is needed to make the Rust toolchain accessible within the [Manylinux container](https://github.com/pypa/manylinux), where the build actually occurs. To ensure the Rust compiler is available for your build, add these environment variables to your workflow:
@@ -225,15 +228,15 @@ Additionally, specifying `CIBW_SKIP` helps circumvent [known compatibility issue
 
 ## Building Wheels for Multiple Python Versions
 
-Python extension modules are typically tied to the Python version they were compiled against. However, by leveraging the limited Python API (abi3), developers can create extensions that are compatible across multiple Python versions, minimizing the need to build and distribute multiple versions. 
+Python extension modules are typically tied to the Python version they were compiled against. However, by leveraging the [limited Python API (abi3)](https://docs.python.org/3/c-api/stable.html), developers can create extensions that are compatible across multiple Python versions, minimizing the need to build and distribute multiple versions. 
 
-- **PyO3 Documentation**: Details how to build and distribute Rust-based Python modules or binaries, covering Python version compatibility and linker arguments. [Read the guide](https://pyo3.rs/v0.21.0/building-and-distribution.html).
+- **PyO3 Documentation**: Details [how to build and distribute Rust-based Python modules](https://pyo3.rs/v0.21.0/building-and-distribution.html) or binaries, covering Python version compatibility and linker arguments.
 
-- **Setuptools-Rust Documentation**: Describes building distributable wheels with `setuptools-rust`, including how to support multiple Python versions in one binary. [See the instructions](https://setuptools-rust.readthedocs.io/en/latest/building_wheels.html).
+- **Setuptools-Rust Documentation**: Describes [how to build distributable wheels with `setuptools-rust`](https://setuptools-rust.readthedocs.io/en/latest/building_wheels.html), including how to support multiple Python versions in one binary.
 
 > Because `setuptools-rust` is an extension to `setuptools`, the standard [`python -m build`](https://pypa-build.readthedocs.io/en/stable/) command can be used to build distributable wheels.
 
-Correctly configuring `abi3` means cibuildwheel can work the same was as before, but with the added benefit of compatibility across multiple Python versions. Here's how to set it up:
+Correctly configuring `abi3` means `cibuildwheel` will still work as expected, but with the added benefit of compatibility across multiple Python versions.
 
 1. **Enable `abi3` in PyO3**: Adjust your `crates/Cargo.toml` to activate the `abi3` feature, ensuring compatibility across Python versions:
 
@@ -254,64 +257,47 @@ Correctly configuring `abi3` means cibuildwheel can work the same was as before,
 Configuring wheels for `abi3` compatibility via `pyproject.toml`, as outlined in [PyO3/setuptools-rust#399](https://github.com/PyO3/setuptools-rust/issues/399), deviates from standard practices recommended in the official documentation, which suggest using `setup.cfg` or the `DIST_EXTRA_CONFIG` environment variable.
 :::
 
-## Generate Tagged Release Notes
+## Generate Release Notes with Commits
 
-Reference:
+To complete the release process, we should communicate the changes between versions to users. This is made easier by enforcing [Conventional Commits](https://www.conventionalcommits.org) to standardize the structure of commits using a [pre-commit hook](https://pre-commit.com/). To validate commit messages against the convention, I use [Git Convention Commits](https://github.com/qoomon/git-conventional-commits) as a pre-commit hook. Additionally, I use [Conventional Changelog](https://github.com/conventional-changelog/conventional-changelog) to generate release notes based on commit messages.
 
-- conventional commits(<https://www.conventionalcommits.org>)
-- angular commit convention (<https://github.com/angular/angular/blob/68a6a07/CONTRIBUTING.md#commit>)
-- Popular tool is <https://github.com/vaab/gitchangelog>
-
-Enforce conventional commits to automatically generate CHANGELOGs, and semantic versioning. but because I have already set up enforcement of using this commit-msg hook <https://github.com/qoomon/git-conventional-commits> there is a better way.
-
-I use this tool <https://github.com/conventional-changelog/conventional-changelog> to build the changelog notes. This tool is intended to work by generating the release notes before the tagged commitbut because I use the tagged commit to trigger this action I need to do something a bit messy.
-
-Specify `-r 2` to get the last two releases (the most recent commit is from HEAD ahead of the last tagged commit, but I really want the second one). Then trim the first two lines of this file to remove the junk notes.
+This involves adding a step to the workflow to call the `conventional-changelog` CLI to generate the changelog.
 
 ```yaml
 - name: Generate Changelog
-run: |
-  npm install -g conventional-changelog-cli
-  conventional-changelog -p angular -r 1 > temp_changelog.md
-  echo "$(cat temp_changelog.md CHANGELOG.md)" > CHANGELOG.md
-
-- name: Commit changes and push back to GitHub
-uses: stefanzweifel/git-auto-commit-action@v4
-with:
-  commit_message: "docs(changelog): update CHANGELOG.md for release"
-  file_pattern: CHANGELOG.md
-  branch: main
+  run: |
+    npm install -g conventional-changelog-cli
+    conventional-changelog -p conventionalcommits -r 2 | tail -n +3 > CHANGELOG.tmp
 ```
 
-I make this separation because on the release, I can link the path for the release notes to be the output for the last tag while still maintaining a separate file for all changes.
+:::{.callout-note}
+The `conventional-changelog` tool is intended to be run before creating a tag. However, our process triggers it with a tagged commit push. To adapt, we use `-r 2`, fetching notes up to the second latest tag—capturing the intended release's notes. We then trim the first two lines to eliminate any unrelated introductory content, ensuring our release notes are succinct and directly related to the changes made.
+:::
 
-GH-release action (<https://github.com/marketplace/actions/gh-release>)
+Finally, I use the [GH-release action](https://github.com/marketplace/actions/gh-release) to create a release and attach the generated wheels and changelog.
 
 ```yaml
 - name: Create Release
-uses: softprops/action-gh-release@v2
-with:
-  files: ./wheelhouse/*.whl
-  body_path: temp_changelog.md
-env:
-  GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+  uses: softprops/action-gh-release@v2
+  with:
+    files: ./wheelhouse/**/*.whl
+    body_path: CHANGELOG.tmp
+  env:
+    GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
 ```
 
-I'll also highlight Google's release-please action, <https://github.com/googleapis/release-please,> which generates release PRs based on conventional commits. This could be a good option; however, python repositories must have a `setup.py` and `setup.cfg` to work.
+#### Alternative Tools for Generating Changelogs
 
-This is also a good option, but this will only generate release notes based on merged pull requests instead of by commits. This is in some ways better - but my repositories do not necessarily enforce branch protection rules, which means you can directly commit to `main`.
+- **Gitchangelog**: [A versatile tool](https://github.com/vaab/gitchangelog) for generating changelogs directly from git commit history, suitable for projects that might not strictly follow the conventional commits format.
 
-<https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#about-automatically-generated-release-notes>
+- **Release-Please Action**: Offered by Google, [this action](https://github.com/googleapis/release-please) automates release pull requests based on conventional commits. However, it requires the presence of `setup.py` and `setup.cfg` in Python repositories, which may not align with all project structures.
 
-# Part 3. Putting it All together
+- **GitHub's Auto-generated Release Notes**: [This feature](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#about-automatically-generated-release-notes) generates release notes based on merged pull requests rather than commits, providing an alternative perspective on the changes between versions.
+ 
 
-Here are two example projects that use cibuildwheel with setuptools_rust
+# Putting it All together
 
-1. <https://github.com/daggy1234/polaroid/blob/main/.github/workflows/publish.yml>
-2. <https://github.com/etesync/etebase-py/blob/master/.github/workflows/manual.yml>
-
-Here is the file from the template repository:
-https://github.com/evmckinney9/python-template/blob/main/.github/workflows/release.yml
+Now that I have figured out all the pieces to the workflow, I need to write a single configuration file. See my complete [workflow action](https://github.com/evmckinney9/python-template/blob/main/.github/workflows/release.yml) in the project template repository: 
 
 ```yaml
 name: CI
@@ -413,32 +399,34 @@ jobs:
 
 ## Verification
 
-Let's make sure using the template now works. Can I commit a change, create a release, and pip install on windows (with no rust) and on a lower python version.
+Now that I have implemented all the necessary changes, I can verify the process by following these steps:
 
-![Figure 3: Caption.](figures/image3.png)  
+1. **Commit and Release**: Following the outlined process, any new changes in the project are committed and pushed to the GitHub repository. The GitHub Actions workflow then triggers, building wheels for various platforms and Python versions, culminating in a new release that includes these wheels and auto-generated changelog based on commit messages.
 
-and after some tweaking got this working
+  ![Figure 3: A successful CI pipeline run.](figures/image3.png)  
 
-![Figure 4: Caption.](figures/image4.png)  
+2. **Installation**: With the release created, users can install the package directly using `pip` and the URL to the wheel file in the release assets. This step bypasses the need for a Rust compiler on the user's machine and also ensures compatibility with the Python version specified by the wheel's `abi3` tag.
 
-Let's try installing again. Instead of
-
-```bash
-pip install -e git+https://github.com/evmckinney9/template_demo#egg=template_demo
+:::{.callout-important}
+Unlike before, now I'll `pip install` directly from the wheel file.
+```{.bash code-line-numbers="false"}
+evmck@Evan-Desktop ~/Downloads/windows_template_demo
+$ pip install https://github.com/evmckinney9/template_demo/releases/download/v0.2.0/template_demo-0.1.0-cp39-abi3-win_amd64.whl
 ```
+:::
 
-I'll directly install the wheel file from the latest release.
+3. **Testing on Different Environments**: Installing the package on a Windows system without Rust installed and on a system with a lower Python version than the one used for package development should proceed without any issues. The successful installation and functionality of Rust methods within Python affirm the package's cross-platform and cross-version compatibility.
 
-```bash
-pip install https://github.com/evmckinney9/template_demo/releases/download/v0.2.0/template_demo-0.1.0-cp39-abi3-win_amd64.whl
-```
+  ![Figure 4: GitHub release showing the changelog and generated wheels.](figures/image4.png)  
 
-Success!! The `template_demo` package was successfully installed - and I could run the rust methods from `_accelerate` even though I never installed Rust on my windows machine.
+Following these steps, `template_demo` installed and ran without any issues, demonstrating that our workflow for building and distributing Python packages with Rust extensions works as intended.
 
 ## Next Steps
 
-- Dockerfile or Containerfile -> make it easier to reproduce experiments
-- Remove hardcoding of python-version across multiple files. Use a .py-version file?
-- Improve version bumping. Enforce semantic versioning and something that updates the pyproject.toml file
-- generate documentation (sphinx, mkdocs, pdocs) Want something simple and integrates best with my existing documentation style (google docstrings)
-- Find a setup for debugging template actions. Current approach is update template -> clone template -> commit to trigger action -> observe what happens. Can I trigger actions in a more controlled manner before having to push changes back to github?
+Some things I plan to explore in the future include:
+
+- **Dockerize the Environment**: Create a Dockerfile to ensure consistent development and testing environments.
+- **Centralize Python Version Management**: Use a single `.python-version` file to specify the Python version across all environments and configurations.
+- **Automate Version Bumping**: Implement an automated system for version management that adheres to semantic versioning.
+- **Simplify Documentation Generation**: Choose a documentation generator that integrates well with your existing setup and automate the process.
+- **Streamline Workflow Debugging**: Explore tools and practices for more efficient debugging of GitHub Actions and template updates.
