@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.553">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Evan McKinney">
+<meta name="dcterms.date" content="2024-04-04">
+<meta name="description" content="This post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user’s machine.">
+
+<title>Evan’s Blog - Building Python Wheels with Rust Extensions Using GitHub Actions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../assets/favicon.ico" rel="icon">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-0S6658MQKV"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-0S6658MQKV', { 'anonymize_ip': true});
+</script>
+<style>html{ scroll-behavior: smooth; }</style>
+<style>
+
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(../../assets/img/banner.png);
+background-size: cover;
+      }
+</style>
+
+
+<link rel="stylesheet" href="../../assets/css/styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Evan’s Blog</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/evmckinney9/jenglot"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Building Python Wheels with Rust Extensions Using GitHub Actions</h1>
+                  <div>
+        <div class="description">
+          <p>This post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user’s machine.</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">devops</div>
+                <div class="quarto-category">python</div>
+                <div class="quarto-category">rust</div>
+                <div class="quarto-category">github</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Evan McKinney <a href="mailto:evmckinney9@gmail.com" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0002-4865-5458" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 4, 2024</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#setup-python-with-rust" id="toc-setup-python-with-rust" class="nav-link active" data-scroll-target="#setup-python-with-rust">Setup Python with Rust</a>
+  <ul class="collapse">
+  <li><a href="#modify-package-structure" id="toc-modify-package-structure" class="nav-link" data-scroll-target="#modify-package-structure">Modify Package Structure</a></li>
+  <li><a href="#define-the-rust-functions" id="toc-define-the-rust-functions" class="nav-link" data-scroll-target="#define-the-rust-functions">Define the Rust Functions</a></li>
+  <li><a href="#testing-the-template" id="toc-testing-the-template" class="nav-link" data-scroll-target="#testing-the-template">Testing the Template</a></li>
+  </ul></li>
+  <li><a href="#distributing-wheels" id="toc-distributing-wheels" class="nav-link" data-scroll-target="#distributing-wheels">Distributing Wheels</a>
+  <ul class="collapse">
+  <li><a href="#building-wheels-for-multiple-platforms" id="toc-building-wheels-for-multiple-platforms" class="nav-link" data-scroll-target="#building-wheels-for-multiple-platforms">Building Wheels for Multiple Platforms</a></li>
+  <li><a href="#building-wheels-for-multiple-python-versions" id="toc-building-wheels-for-multiple-python-versions" class="nav-link" data-scroll-target="#building-wheels-for-multiple-python-versions">Building Wheels for Multiple Python Versions</a></li>
+  <li><a href="#generate-release-notes-with-commits" id="toc-generate-release-notes-with-commits" class="nav-link" data-scroll-target="#generate-release-notes-with-commits">Generate Release Notes with Commits</a></li>
+  </ul></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together">Putting it All together</a>
+  <ul class="collapse">
+  <li><a href="#verification" id="toc-verification" class="nav-link" data-scroll-target="#verification">Verification</a></li>
+  <li><a href="#next-steps" id="toc-next-steps" class="nav-link" data-scroll-target="#next-steps">Next Steps</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+
+<p>The goal of this post is to document the updates I made to my Python project template to <strong>support creation of packages with Rust extensions that are installable via pip, without the need for a Rust compiler on the installation target</strong>. Utilizing GitHub Actions and <code>cibuildwheel</code>, I automate the creation of wheels across multiple platforms.</p>
+<p>Everything that follows has been implemented in my <a href="https://github.com/evmckinney9/python-template">Python project template</a>.</p>
+<hr>
+<ul>
+<li><p><strong>GitHub Actions</strong>: Automates workflows, enabling CI/CD for project builds and tests. Learn more through <a href="https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners">GitHub-hosted runners</a> and <a href="https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python">building/testing Python</a>.</p></li>
+<li><p><strong>Learning Rust</strong>: Improve your Rust knowledge with the <a href="https://doc.rust-lang.org/stable/book/">Rust Book</a> and <a href="https://google.github.io/comprehensive-rust/">Comprehensive Rust by Google</a>. Practice with <a href="https://github.com/rust-lang/rustlings">Rustlings exercises</a>, and explore resources like <a href="https://github.com/rust-unofficial/awesome-rust">Awesome Rust</a> and <a href="https://github.com/TheAlgorithms/Rust">Rust Algorithms</a>.</p></li>
+<li><p><strong>Rust and Python Integration</strong>: Utilize <a href="https://pyo3.rs">PyO3</a> for creating Python bindings for Rust code. <a href="https://www.maturin.rs/">Maturin</a> is a popular tool for building Python packages from Rust extensions, although not used in this project.</p>
+<ul>
+<li><a href="https://github.com/PyO3/setuptools-rust"><code>setuptools-rust</code></a> is an add-on for <code>setuptools</code> which is more flexibile but requires more configuration than <code>maturin</code>.</li>
+<li><a href="https://github.com/Qiskit/qiskit/tree/main/crates/accelerate">Qiskit Accelerate</a>, alongside its <a href="https://medium.com/qiskit/new-weve-started-using-rust-in-qiskit-for-better-performance-a3676433ca8c">performance insights</a>, illustrates the benefits of Rust and Python integration in a production environment.</li>
+</ul></li>
+</ul>
+<hr>
+<section id="setup-python-with-rust" class="level1">
+<h1>Setup Python with Rust</h1>
+<p>Start with an existing Python project template. In the next steps I used <a href="https://pyo3.rs">PyO3’s documentation</a> for instructions on wrapping Rust for Python, with the <a href="https://github.com/PyO3/pyo3/tree/main/examples/setuptools-rust-starter">setuptools-rust starter</a> as a helpful resource.</p>
+<section id="modify-package-structure" class="level2">
+<h2 class="anchored" data-anchor-id="modify-package-structure">Modify Package Structure</h2>
+<ol type="1">
+<li><p><strong>Update <code>pyproject.toml</code></strong>: Add <code>"setuptools-rust"</code> to the build system requirements, enabling Rust extension builds within your Python project. For detailed guidance, consult the <a href="https://setuptools-rust.readthedocs.io/en/latest/">Setuptools Rust documentation</a>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">[build-system]</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="dt">requires</span> <span class="op">=</span> <span class="op">[</span><span class="st">"setuptools"</span><span class="op">,</span> <span class="st">"wheel"</span><span class="op">,</span> <span class="st">"setuptools-rust"</span><span class="op">]</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="dt">build-backend</span> <span class="op">=</span> <span class="st">"setuptools.build_meta"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Also, define Rust extension modules here, as detailed in the <a href="https://setuptools-rust.readthedocs.io/en/latest/reference.html"><code>RustExtension</code> API documentation</a>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">[[tool.setuptools-rust.ext-modules]]</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"{{project_name}}._accelerate"</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="dt">path</span> <span class="op">=</span> <span class="st">"crates/Cargo.toml"</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="dt">binding</span> <span class="op">=</span> <span class="st">"PyO3"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Revise <code>MANIFEST.in</code></strong>: Update this file to include Rust source files in the package, ensuring a comprehensive package build. Guidance on which files to include can be found in this <a href="https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html">Setuptools documentation</a>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource ini number-lines code-with-copy"><code class="sourceCode ini"><span id="cb3-1"><a href="#cb3-1"></a><span class="dt">include pyproject.toml</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="dt">include crates/Cargo.toml</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="dt">recursive-include crates *.rs</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="dt">recursive-include src *</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Detail <code>crates/Cargo.toml</code></strong>: This file specifies the Rust package’s name, version, and dependencies. PyO3’s inclusion facilitates Python bindings, as outlined in the <a href="https://doc.rust-lang.org/cargo/reference/manifest.html">Cargo manifest format</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">[package]</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"{{project_name}}_accelerate"</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2021"</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="kw">[lib]</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"{{project_name}}_accelerate"</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="dt">crate-type</span> <span class="op">=</span> <span class="op">[</span><span class="st">"cdylib"</span><span class="op">]</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="dt">path</span> <span class="op">=</span> <span class="st">"src/lib.rs"</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="kw">[dependencies.pyo3]</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.20.3"</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="dt">features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"extension-module"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ol>
+</section>
+<section id="define-the-rust-functions" class="level2">
+<h2 class="anchored" data-anchor-id="define-the-rust-functions">Define the Rust Functions</h2>
+<p>The process of integrating Rust functions into your Python project involves a few key steps:</p>
+<ol type="1">
+<li><p><strong>Implement Rust Functions</strong>: Start by defining the Rust functions in <code>crates/src/basic_functions/basic_math.rs</code>. USe PyO3’s <code>#[pyfunction]</code> attribute to ensure these functions are callable from Python.</p>
+<p>For example, to add and subtract in Rust:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">// crates/src/basic_functions/basic_math.rs</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">use</span> <span class="pp">pyo3::prelude::</span><span class="op">*;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="at">#[</span>pyfunction<span class="at">]</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="at">#[</span>pyo3<span class="at">(</span>text_signature <span class="op">=</span> <span class="st">"(a, b, /)"</span><span class="at">)]</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="kw">pub</span> <span class="kw">fn</span> add_in_rust(a<span class="op">:</span> <span class="dt">i32</span><span class="op">,</span> b<span class="op">:</span> <span class="dt">i32</span>) <span class="op">-&gt;</span> PyResult<span class="op">&lt;</span><span class="dt">i32</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>    <span class="cn">Ok</span>(a <span class="op">+</span> b)</span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="op">}</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="at">#[</span>pyfunction<span class="at">]</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="at">#[</span>pyo3<span class="at">(</span>text_signature <span class="op">=</span> <span class="st">"(a, b, /)"</span><span class="at">)]</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="kw">pub</span> <span class="kw">fn</span> subtract_in_rust(a<span class="op">:</span> <span class="dt">i32</span><span class="op">,</span> b<span class="op">:</span> <span class="dt">i32</span>) <span class="op">-&gt;</span> PyResult<span class="op">&lt;</span><span class="dt">i32</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb5-13"><a href="#cb5-13"></a>    <span class="cn">Ok</span>(a <span class="op">-</span> b)</span>
+<span id="cb5-14"><a href="#cb5-14"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Package Rust Functions into Modules</strong>: Next, organize these functions into a module using <code>mod.rs</code>. This step groups your Rust functions logically, making them easier to manage and call from Python.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">// crates/src/basic_functions/mod.rs</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">pub</span> <span class="kw">mod</span> basic_math<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="kw">pub</span> <span class="kw">mod</span> basic_strings<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="kw">use</span> <span class="pp">pyo3::prelude::</span><span class="op">*;</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a></span>
+<span id="cb6-7"><a href="#cb6-7"></a><span class="at">#[</span>pymodule<span class="at">]</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="kw">pub</span> <span class="kw">fn</span> basic_functions(_py<span class="op">:</span> Python<span class="op">,</span> m<span class="op">:</span> <span class="op">&amp;</span>PyModule) <span class="op">-&gt;</span> PyResult<span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a>    m<span class="op">.</span>add_wrapped(<span class="pp">wrap_pyfunction!</span>(<span class="pp">basic_math::</span>add_in_rust))<span class="op">?;</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a>    m<span class="op">.</span>add_wrapped(<span class="pp">wrap_pyfunction!</span>(<span class="pp">basic_math::</span>subtract_in_rust))<span class="op">?;</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a>    m<span class="op">.</span>add_wrapped(<span class="pp">wrap_pyfunction!</span>(<span class="pp">basic_strings::</span>concat_in_rust))<span class="op">?;</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a>    <span class="cn">Ok</span>(())</span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Expose Rust Modules to Python</strong>: Finally, use <code>lib.rs</code> to expose the newly created modules to Python. This step ensures that the Rust-written functions are accessible within your Python environment.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">// crates/src/lib.rs</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="kw">use</span> <span class="pp">pyo3::prelude::</span><span class="op">*;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="kw">use</span> <span class="pp">pyo3::</span>wrap_pymodule<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="kw">mod</span> basic_functions<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="at">#[</span>pymodule<span class="at">]</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="kw">fn</span> _accelerate(_py<span class="op">:</span> Python<span class="op">&lt;</span><span class="ot">'_</span><span class="op">&gt;,</span> m<span class="op">:</span> <span class="op">&amp;</span>PyModule) <span class="op">-&gt;</span> PyResult<span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a>    m<span class="op">.</span>add_wrapped(<span class="pp">wrap_pymodule!</span>(<span class="pp">basic_functions::</span>basic_functions))<span class="op">?;</span></span>
+<span id="cb7-11"><a href="#cb7-11"></a>    <span class="cn">Ok</span>(())</span>
+<span id="cb7-12"><a href="#cb7-12"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ol>
+</section>
+<section id="testing-the-template" class="level2">
+<h2 class="anchored" data-anchor-id="testing-the-template">Testing the Template</h2>
+<p>Verifying the integration involves a straightforward process:</p>
+<ol type="1">
+<li><p><strong>Instantiate and Build</strong>: After setting up the template and implementing the Rust functions, create a new repository from the template and clone it to your development environment. I am using Ubuntu in WSL2, with Rust already installed.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image1.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 1: Creating a new repository from the template.</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Build and Test</strong>: Use the <code>make init</code> command to establish a virtual environment, install the project with all dependencies, and run tests to ensure successful integration.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">evmck@Desktop</span> ~/template_demo</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> make init</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Successful execution and interaction with the package methods can be confirmed in a Jupyter notebook, indicating the Rust functions are callable from Python.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image2.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 2: Successfully calling methods from Jupyter notebook.</figcaption>
+</figure>
+</div></li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Unsuprisingly, attempting to install the package on an environment without Rust results in a build failure.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">evmck@Evan-Desktop</span> ~/Downloads/template_demo</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install <span class="at">-e</span> git+https://github.com/evmckinney9/template_demo#egg=template_demo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The error encountered:</p>
+<pre class="text"><code>ERROR: Failed building editable for template_demo
+Failed to build template_demo
+ERROR: Could not build wheels for template_demo, which is required to install pyproject.toml-based projects 
+(.venv) </code></pre>
+<p>This issue clarifies the importance of modifying the project’s release strategy to enable distribution to machines without Rust.</p>
+</div>
+</div>
+<p>This standard project setup leaves us with a clean modular workspace ready for further development. The next steps involve building release workflows to distribute the package across multiple platforms.</p>
+</section>
+</section>
+<section id="distributing-wheels" class="level1">
+<h1>Distributing Wheels</h1>
+<p>GitHub Actions and <code>cibuildwheel</code> offer a robust solution for automating generation of wheels compatible with multiple platforms. Detailed guidance on setting up workflows can be found in the <a href="https://docs.github.com/en/actions">GitHub Actions official documentation</a> and information on <a href="https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners">Github-hosted runners</a>.</p>
+<p>Here are two example projects that use <code>cibuildwheel</code> with <code>setuptools-rust</code> I found helpful when gluing everything together:</p>
+<ul>
+<li><strong>Polaroid</strong>: A <a href="https://github.com/daggy1234/polaroid/blob/main/.github/workflows/publish.yml">fast image processing library</a></li>
+<li><strong>Etebase</strong>: An <a href="https://github.com/etesync/etebase-py/blob/master/.github/workflows/manual.yml">end-to-end encryption service</a></li>
+</ul>
+<section id="building-wheels-for-multiple-platforms" class="level2">
+<h2 class="anchored" data-anchor-id="building-wheels-for-multiple-platforms">Building Wheels for Multiple Platforms</h2>
+<p>Configure a GitHub Action workflow with <code>cibuildwheel</code>, which simplifies the process of generating wheels for Linux, macOS (including both Intel and Apple Silicon), and Windows platforms. For more information, refer to the <a href="https://cibuildwheel.pypa.io/en/stable/"><code>cibuildwheel</code> documentation</a>. The following <a href="https://cibuildwheel.pypa.io/en/stable/setup/#github-actions">example</a> will be my starting point:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> Build</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="fu">on</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">push</span><span class="kw">,</span><span class="at"> pull_request</span><span class="kw">]</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a></span>
+<span id="cb11-5"><a href="#cb11-5"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="at">  </span><span class="fu">build_wheels</span><span class="kw">:</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build wheels on ${{ matrix.os }}</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ${{ matrix.os }}</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="at">    </span><span class="fu">strategy</span><span class="kw">:</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="at">      </span><span class="fu">matrix</span><span class="kw">:</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co">        # macos-13 is an intel runner, macos-14 is apple silicon</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="at">        </span><span class="fu">os</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">ubuntu-latest</span><span class="kw">,</span><span class="at"> windows-latest</span><span class="kw">,</span><span class="at"> macos</span><span class="dv">-13</span><span class="kw">,</span><span class="at"> macos</span><span class="dv">-14</span><span class="kw">]</span></span>
+<span id="cb11-13"><a href="#cb11-13"></a></span>
+<span id="cb11-14"><a href="#cb11-14"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb11-16"><a href="#cb11-16"></a></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build wheels</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> pypa/cibuildwheel@v2.17.0</span></span>
+<span id="cb11-19"><a href="#cb11-19"></a></span>
+<span id="cb11-20"><a href="#cb11-20"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/upload-artifact@v4</span></span>
+<span id="cb11-21"><a href="#cb11-21"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb11-22"><a href="#cb11-22"></a><span class="at">          </span><span class="fu">name</span><span class="kw">:</span><span class="at"> cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}</span></span>
+<span id="cb11-23"><a href="#cb11-23"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse/*.whl</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This configuration will build wheels for all specified platforms in the <code>matrix.os</code> list, with the resulting wheels stored as artifacts. The <code>cibuildwheel</code> action will automatically detect the Python version and build the wheels accordingly.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>GitHub-hosted runners already have Python and Rust <a href="https://github.com/actions/runner-images#available-images">pre-installed</a>, but for Linux builds, an additional step is needed to make the Rust toolchain accessible within the <a href="https://github.com/pypa/manylinux">Manylinux container</a>, where the build actually occurs. To ensure the Rust compiler is available for your build, add these environment variables to your workflow:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb12-1"><a href="#cb12-1"></a><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="at">  </span><span class="fu">CIBW_BEFORE_BUILD_LINUX</span><span class="kw">:</span><span class="at"> curl -sSf https://sh.rustup.rs | sh -s -- -y</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="at">  </span><span class="fu">CIBW_ENVIRONMENT_LINUX</span><span class="kw">:</span><span class="at"> </span><span class="st">"PATH=$HOME/.cargo/bin:$PATH"</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a><span class="at">  </span><span class="fu">CIBW_SKIP</span><span class="kw">:</span><span class="at"> </span><span class="st">"cp36-* cp37-* cp38-* pp* *-win32 *-musllinux* *_i686"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Additionally, specifying <code>CIBW_SKIP</code> helps circumvent <a href="https://github.com/rust-lang/rustup/issues/2984">known compatibility issues</a>.</p>
+</div>
+</div>
+</section>
+<section id="building-wheels-for-multiple-python-versions" class="level2">
+<h2 class="anchored" data-anchor-id="building-wheels-for-multiple-python-versions">Building Wheels for Multiple Python Versions</h2>
+<p>Python extension modules are typically tied to the Python version they were compiled against. However, by leveraging the <a href="https://docs.python.org/3/c-api/stable.html">limited Python API (abi3)</a>, developers can create extensions that are compatible across multiple Python versions, minimizing the need to build and distribute multiple versions.</p>
+<ul>
+<li><p><strong>PyO3 Documentation</strong>: Details <a href="https://pyo3.rs/v0.21.0/building-and-distribution.html">how to build and distribute Rust-based Python modules</a> or binaries, covering Python version compatibility and linker arguments.</p></li>
+<li><p><strong>Setuptools-Rust Documentation</strong>: Describes <a href="https://setuptools-rust.readthedocs.io/en/latest/building_wheels.html">how to build distributable wheels with <code>setuptools-rust</code></a>, including how to support multiple Python versions in one binary.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p>Because <code>setuptools-rust</code> is an extension to <code>setuptools</code>, the standard <a href="https://pypa-build.readthedocs.io/en/stable/"><code>python -m build</code></a> command can be used to build distributable wheels.</p>
+</blockquote>
+<p>Correctly configuring <code>abi3</code> means <code>cibuildwheel</code> will still work as expected, but with the added benefit of compatibility across multiple Python versions.</p>
+<ol type="1">
+<li><p><strong>Enable <code>abi3</code> in PyO3</strong>: Adjust your <code>crates/Cargo.toml</code> to activate the <code>abi3</code> feature, ensuring compatibility across Python versions:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">[dependencies.pyo3]</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.20.3"</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="dt">features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"extension-module"</span><span class="op">,</span> <span class="st">"abi3"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Mark Wheels as <code>abi3</code></strong>: Indicate the use of the limited API by configuring your <code>pyproject.toml</code>, which signals that the wheels are compatible with multiple Python versions starting from a specified minimum:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">[tool.distutils.bdist_wheel]</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="dt">py_limited_api</span> <span class="op">=</span> <span class="st">"cp39"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ol>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Warning
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Configuring wheels for <code>abi3</code> compatibility via <code>pyproject.toml</code>, as outlined in <a href="https://github.com/PyO3/setuptools-rust/issues/399">PyO3/setuptools-rust#399</a>, deviates from standard practices recommended in the official documentation, which suggest using <code>setup.cfg</code> or the <code>DIST_EXTRA_CONFIG</code> environment variable.</p>
+</div>
+</div>
+</section>
+<section id="generate-release-notes-with-commits" class="level2">
+<h2 class="anchored" data-anchor-id="generate-release-notes-with-commits">Generate Release Notes with Commits</h2>
+<p>To complete the release process, we should communicate the changes between versions to users. This is made easier by enforcing <a href="https://www.conventionalcommits.org">Conventional Commits</a> to standardize the structure of commits using a <a href="https://pre-commit.com/">pre-commit hook</a>. To validate commit messages against the convention, I use <a href="https://github.com/qoomon/git-conventional-commits">Git Convention Commits</a> as a pre-commit hook. Additionally, I use <a href="https://github.com/conventional-changelog/conventional-changelog">Conventional Changelog</a> to generate release notes based on commit messages.</p>
+<p>This involves adding a step to the workflow to call the <code>conventional-changelog</code> CLI to generate the changelog.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Generate Changelog</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="fu">  run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a>    npm install -g conventional-changelog-cli</span>
+<span id="cb15-4"><a href="#cb15-4"></a>    conventional-changelog -p conventionalcommits -r 2 | tail -n +3 &gt; CHANGELOG.tmp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>conventional-changelog</code> tool is intended to be run before creating a tag. However, our process triggers it with a tagged commit push. To adapt, we use <code>-r 2</code>, fetching notes up to the second latest tag—capturing the intended release’s notes. We then trim the first two lines to eliminate any unrelated introductory content, ensuring our release notes are succinct and directly related to the changes made.</p>
+</div>
+</div>
+<p>Finally, I use the <a href="https://github.com/marketplace/actions/gh-release">GH-release action</a> to create a release and attach the generated wheels and changelog.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Create Release</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="at">  </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> softprops/action-gh-release@v2</span></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="at">  </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="at">    </span><span class="fu">files</span><span class="kw">:</span><span class="at"> ./wheelhouse/**/*.whl</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a><span class="at">    </span><span class="fu">body_path</span><span class="kw">:</span><span class="at"> CHANGELOG.tmp</span></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="at">  </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb16-7"><a href="#cb16-7"></a><span class="at">    </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> </span><span class="st">'${{ secrets.GITHUB_TOKEN }}'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="alternative-tools-for-generating-changelogs" class="level4">
+<h4 class="anchored" data-anchor-id="alternative-tools-for-generating-changelogs">Alternative Tools for Generating Changelogs</h4>
+<ul>
+<li><p><strong>Gitchangelog</strong>: <a href="https://github.com/vaab/gitchangelog">A versatile tool</a> for generating changelogs directly from git commit history, suitable for projects that might not strictly follow the conventional commits format.</p></li>
+<li><p><strong>Release-Please Action</strong>: Offered by Google, <a href="https://github.com/googleapis/release-please">this action</a> automates release pull requests based on conventional commits. However, it requires the presence of <code>setup.py</code> and <code>setup.cfg</code> in Python repositories, which may not align with all project structures.</p></li>
+<li><p><strong>GitHub’s Auto-generated Release Notes</strong>: <a href="https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes#about-automatically-generated-release-notes">This feature</a> generates release notes based on merged pull requests rather than commits, providing an alternative perspective on the changes between versions.</p></li>
+</ul>
+</section>
+</section>
+</section>
+<section id="putting-it-all-together" class="level1">
+<h1>Putting it All together</h1>
+<p>Now that I have figured out all the pieces to the workflow, I need to write a single configuration file. See my complete <a href="https://github.com/evmckinney9/python-template/blob/main/.github/workflows/release.yml">workflow action</a> in the project template repository:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource yaml number-lines code-with-copy"><code class="sourceCode yaml"><span id="cb17-1"><a href="#cb17-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> CI</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="fu">on</span><span class="kw">:</span><span class="co"> # triggered by push tagged commits to main</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="at">  </span><span class="fu">push</span><span class="kw">:</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="at">    </span><span class="fu">tags</span><span class="kw">:</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">'v*'</span></span>
+<span id="cb17-7"><a href="#cb17-7"></a></span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="fu">permissions</span><span class="kw">:</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a><span class="at">  </span><span class="fu">contents</span><span class="kw">:</span><span class="at"> write</span></span>
+<span id="cb17-10"><a href="#cb17-10"></a></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="fu">jobs</span><span class="kw">:</span></span>
+<span id="cb17-12"><a href="#cb17-12"></a><span class="at">  </span><span class="fu">check-for-flag-file</span><span class="kw">:</span></span>
+<span id="cb17-13"><a href="#cb17-13"></a><span class="at">    </span><span class="fu">if</span><span class="kw">:</span><span class="at"> github.repository != 'evmckinney9/python-template'</span></span>
+<span id="cb17-14"><a href="#cb17-14"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb17-15"><a href="#cb17-15"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
+<span id="cb17-16"><a href="#cb17-16"></a><span class="at">      </span><span class="fu">continue</span><span class="kw">:</span><span class="at"> ${{ steps.flag-check.outputs.continue }}</span></span>
+<span id="cb17-17"><a href="#cb17-17"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb17-18"><a href="#cb17-18"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb17-19"><a href="#cb17-19"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check for template_flag.yml</span></span>
+<span id="cb17-20"><a href="#cb17-20"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> flag-check</span></span>
+<span id="cb17-21"><a href="#cb17-21"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb17-22"><a href="#cb17-22"></a>          if [ ! -f .github/template_flag.yml ]; then</span>
+<span id="cb17-23"><a href="#cb17-23"></a>            echo "continue=true" &gt;&gt; $GITHUB_OUTPUT</span>
+<span id="cb17-24"><a href="#cb17-24"></a>          else</span>
+<span id="cb17-25"><a href="#cb17-25"></a>            echo "continue=false" &gt;&gt; $GITHUB_OUTPUT</span>
+<span id="cb17-26"><a href="#cb17-26"></a>          fi</span>
+<span id="cb17-27"><a href="#cb17-27"></a></span>
+<span id="cb17-28"><a href="#cb17-28"></a><span class="at">  </span><span class="fu">build_wheels</span><span class="kw">:</span></span>
+<span id="cb17-29"><a href="#cb17-29"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> check-for-flag-file</span></span>
+<span id="cb17-30"><a href="#cb17-30"></a><span class="at">    </span><span class="fu">if</span><span class="kw">:</span><span class="at"> needs.check-for-flag-file.outputs.continue == 'true'</span></span>
+<span id="cb17-31"><a href="#cb17-31"></a><span class="at">    </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'Build wheels on ${{ matrix.os }}'</span></span>
+<span id="cb17-32"><a href="#cb17-32"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> </span><span class="st">'${{ matrix.os }}'</span></span>
+<span id="cb17-33"><a href="#cb17-33"></a><span class="at">    </span><span class="fu">strategy</span><span class="kw">:</span></span>
+<span id="cb17-34"><a href="#cb17-34"></a><span class="at">      </span><span class="fu">matrix</span><span class="kw">:</span></span>
+<span id="cb17-35"><a href="#cb17-35"></a><span class="at">        </span><span class="fu">os</span><span class="kw">:</span></span>
+<span id="cb17-36"><a href="#cb17-36"></a><span class="at">          </span><span class="kw">-</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb17-37"><a href="#cb17-37"></a><span class="at">          </span><span class="kw">-</span><span class="at"> windows-latest</span></span>
+<span id="cb17-38"><a href="#cb17-38"></a><span class="at">          </span><span class="kw">-</span><span class="at"> macos-13</span></span>
+<span id="cb17-39"><a href="#cb17-39"></a><span class="at">          </span><span class="kw">-</span><span class="at"> macos-14</span></span>
+<span id="cb17-40"><a href="#cb17-40"></a><span class="at">    </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb17-41"><a href="#cb17-41"></a><span class="at">      </span><span class="fu">CIBW_BEFORE_BUILD_LINUX</span><span class="kw">:</span><span class="at"> curl -sSf https://sh.rustup.rs | sh -s -- -y</span></span>
+<span id="cb17-42"><a href="#cb17-42"></a><span class="at">      </span><span class="fu">CIBW_ENVIRONMENT_LINUX</span><span class="kw">:</span><span class="at"> </span><span class="st">"PATH=$HOME/.cargo/bin:$PATH"</span></span>
+<span id="cb17-43"><a href="#cb17-43"></a><span class="at">      </span><span class="fu">CIBW_SKIP</span><span class="kw">:</span><span class="at"> </span><span class="st">"cp36-* cp37-* cp38-* cp39-* pp* *-win32 *-musllinux* *_i686"</span></span>
+<span id="cb17-44"><a href="#cb17-44"></a></span>
+<span id="cb17-45"><a href="#cb17-45"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb17-46"><a href="#cb17-46"></a></span>
+<span id="cb17-47"><a href="#cb17-47"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb17-48"><a href="#cb17-48"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check if template_flag.yml is gone</span></span>
+<span id="cb17-49"><a href="#cb17-49"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> check-template</span></span>
+<span id="cb17-50"><a href="#cb17-50"></a><span class="at">        </span><span class="fu">if</span><span class="kw">:</span><span class="at"> ${{ hashFiles('.github/template_flag.yml') == '' }}</span></span>
+<span id="cb17-51"><a href="#cb17-51"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb17-52"><a href="#cb17-52"></a>          echo "release_continue=true" &gt;&gt; $GITHUB_ENV</span>
+<span id="cb17-53"><a href="#cb17-53"></a></span>
+<span id="cb17-54"><a href="#cb17-54"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build wheels</span></span>
+<span id="cb17-55"><a href="#cb17-55"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> pypa/cibuildwheel@v2.17.0</span></span>
+<span id="cb17-56"><a href="#cb17-56"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/upload-artifact@v4</span></span>
+<span id="cb17-57"><a href="#cb17-57"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-58"><a href="#cb17-58"></a><span class="at">          </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}'</span></span>
+<span id="cb17-59"><a href="#cb17-59"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse/*.whl</span></span>
+<span id="cb17-60"><a href="#cb17-60"></a><span class="at">  </span><span class="fu">release</span><span class="kw">:</span></span>
+<span id="cb17-61"><a href="#cb17-61"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">check-for-flag-file</span><span class="kw">,</span><span class="at"> build_wheels</span><span class="kw">]</span></span>
+<span id="cb17-62"><a href="#cb17-62"></a><span class="at">    </span><span class="fu">if</span><span class="kw">:</span><span class="at"> needs.check-for-flag-file.outputs.continue == 'true'</span></span>
+<span id="cb17-63"><a href="#cb17-63"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb17-64"><a href="#cb17-64"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb17-65"><a href="#cb17-65"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check out the repo</span></span>
+<span id="cb17-66"><a href="#cb17-66"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb17-67"><a href="#cb17-67"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-68"><a href="#cb17-68"></a><span class="at">          </span><span class="fu">fetch-depth</span><span class="kw">:</span><span class="at"> </span><span class="dv">0</span></span>
+<span id="cb17-69"><a href="#cb17-69"></a></span>
+<span id="cb17-70"><a href="#cb17-70"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb17-71"><a href="#cb17-71"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check for initial commit condition and exit if true</span></span>
+<span id="cb17-72"><a href="#cb17-72"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb17-73"><a href="#cb17-73"></a>          if [ -f .github/template_flag.yml ]; then</span>
+<span id="cb17-74"><a href="#cb17-74"></a>            echo "Initial commit setup detected, exitting."</span>
+<span id="cb17-75"><a href="#cb17-75"></a>            exit 0</span>
+<span id="cb17-76"><a href="#cb17-76"></a>          fi</span>
+<span id="cb17-77"><a href="#cb17-77"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Set up Node.js</span></span>
+<span id="cb17-78"><a href="#cb17-78"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/setup-node@v4</span></span>
+<span id="cb17-79"><a href="#cb17-79"></a></span>
+<span id="cb17-80"><a href="#cb17-80"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Generate Changelog</span></span>
+<span id="cb17-81"><a href="#cb17-81"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb17-82"><a href="#cb17-82"></a>          npm install -g conventional-changelog-cli</span>
+<span id="cb17-83"><a href="#cb17-83"></a>          conventional-changelog -p conventionalcommits -r 2 | tail -n +3 &gt; CHANGELOG.tmp</span>
+<span id="cb17-84"><a href="#cb17-84"></a></span>
+<span id="cb17-85"><a href="#cb17-85"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/download-artifact@v4</span></span>
+<span id="cb17-86"><a href="#cb17-86"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-87"><a href="#cb17-87"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse</span></span>
+<span id="cb17-88"><a href="#cb17-88"></a></span>
+<span id="cb17-89"><a href="#cb17-89"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Create Release</span></span>
+<span id="cb17-90"><a href="#cb17-90"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> softprops/action-gh-release@v2</span></span>
+<span id="cb17-91"><a href="#cb17-91"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-92"><a href="#cb17-92"></a><span class="at">          </span><span class="fu">files</span><span class="kw">:</span><span class="at"> ./wheelhouse/**/*.whl</span></span>
+<span id="cb17-93"><a href="#cb17-93"></a><span class="at">          </span><span class="fu">body_path</span><span class="kw">:</span><span class="at"> CHANGELOG.tmp</span></span>
+<span id="cb17-94"><a href="#cb17-94"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb17-95"><a href="#cb17-95"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> </span><span class="st">'${{ secrets.GITHUB_TOKEN }}'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="verification" class="level2">
+<h2 class="anchored" data-anchor-id="verification">Verification</h2>
+<p>Now that I have implemented all the necessary changes, I can verify the process by following these steps:</p>
+<ol type="1">
+<li><strong>Commit and Release</strong>: Following the outlined process, any new changes in the project are committed and pushed to the GitHub repository. The GitHub Actions workflow then triggers, building wheels for various platforms and Python versions, culminating in a new release that includes these wheels and auto-generated changelog based on commit messages.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image3.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 3: A successful CI pipeline run.</figcaption>
+</figure>
+</div>
+<ol start="2" type="1">
+<li><strong>Installation</strong>: With the release created, users can install the package directly using <code>pip</code> and the URL to the wheel file in the release assets. This step bypasses the need for a Rust compiler on the user’s machine and also ensures compatibility with the Python version specified by the wheel’s <code>abi3</code> tag.</li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Unlike before, now I’ll <code>pip install</code> directly from the wheel file.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="ex">evmck@Evan-Desktop</span> ~/Downloads/windows_template_demo</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install https://github.com/evmckinney9/template_demo/releases/download/v0.2.0/template_demo-0.1.0-cp39-abi3-win_amd64.whl</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<ol start="3" type="1">
+<li><strong>Testing on Different Environments</strong>: Installing the package on a Windows system without Rust installed and on a system with a lower Python version than the one used for package development should proceed without any issues. The successful installation and functionality of Rust methods within Python affirm the package’s cross-platform and cross-version compatibility.</li>
+</ol>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="figures/image4.png" class="img-fluid figure-img"></p>
+<figcaption>Figure 4: GitHub release showing the changelog and generated wheels.</figcaption>
+</figure>
+</div>
+<p>Following these steps, <code>template_demo</code> installed and ran without any issues, demonstrating that our workflow for building and distributing Python packages with Rust extensions works as intended.</p>
+</section>
+<section id="next-steps" class="level2">
+<h2 class="anchored" data-anchor-id="next-steps">Next Steps</h2>
+<p>Some things I plan to explore in the future include:</p>
+<ul>
+<li><strong>Dockerize the Environment</strong>: Create a Dockerfile to ensure consistent development and testing environments.</li>
+<li><strong>Centralize Python Version Management</strong>: Use a single <code>.python-version</code> file to specify the Python version across all environments and configurations.</li>
+<li><strong>Automate Version Bumping</strong>: Implement an automated system for version management that adheres to semantic versioning.</li>
+<li><strong>Simplify Documentation Generation</strong>: Choose a documentation generator that integrates well with your existing setup and automate the process.</li>
+<li><strong>Streamline Workflow Debugging</strong>: Explore tools and practices for more efficient debugging of GitHub Actions and template updates.</li>
+</ul>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/blog\.evm9\.dev");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="evmckinney9/jenglot" data-repo-id="R_kgDOKiMvFg" data-category="General" data-category-id="DIC_kwDOKiMvFs4CaQWE" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+</div> <!-- /content -->
+
+
+
+
+<script src="../../site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

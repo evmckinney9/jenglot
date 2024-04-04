@@ -2,10 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://blog.evm9.dev/index.html</loc>
-    <lastmod>2024-04-03T20:40:33.416Z</lastmod>
+    <lastmod>2024-04-04T23:38:29.951Z</lastmod>
   </url>
   <url>
-    <loc>https://blog.evm9.dev/posts/prox_vpn/index.html</loc>
-    <lastmod>2024-04-03T20:40:33.432Z</lastmod>
+    <loc>https://blog.evm9.dev/posts/00_prox_vpn/index.html</loc>
+    <lastmod>2024-04-04T23:38:29.959Z</lastmod>
+  </url>
+  <url>
+    <loc>https://blog.evm9.dev/posts/01_rust_wheels/index.html</loc>
+    <lastmod>2024-04-04T23:38:29.975Z</lastmod>
   </url>
 </urlset>

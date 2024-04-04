@@ -10,17 +10,30 @@
 <atom:link href="https://blog.evm9.dev/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog about quantum computing, programming, and other things.</description>
 <generator>quarto-1.4.553</generator>
-<lastBuildDate>Wed, 20 Mar 2024 00:00:00 GMT</lastBuildDate>
+<lastBuildDate>Thu, 04 Apr 2024 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Building Python Wheels with Rust Extensions Using GitHub Actions</title>
+  <dc:creator>Evan McKinney</dc:creator>
+  <link>https://blog.evm9.dev/posts/01_rust_wheels/</link>
+  <description><![CDATA[ This post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user’s machine. ]]></description>
+  <category>devops</category>
+  <category>python</category>
+  <category>rust</category>
+  <category>github</category>
+  <guid>https://blog.evm9.dev/posts/01_rust_wheels/</guid>
+  <pubDate>Thu, 04 Apr 2024 00:00:00 GMT</pubDate>
+  <media:content url="https://blog.evm9.dev/posts/01_rust_wheels/figures/cover.png" medium="image" type="image/png" height="147" width="144"/>
+</item>
 <item>
   <title>Configuring an LXC container with an external VPN</title>
   <dc:creator>Evan McKinney</dc:creator>
-  <link>https://blog.evm9.dev/posts/prox_vpn/</link>
+  <link>https://blog.evm9.dev/posts/00_prox_vpn/</link>
   <description><![CDATA[ This guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications. ]]></description>
   <category>proxmox</category>
   <category>sysops</category>
-  <guid>https://blog.evm9.dev/posts/prox_vpn/</guid>
+  <guid>https://blog.evm9.dev/posts/00_prox_vpn/</guid>
   <pubDate>Wed, 20 Mar 2024 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.evm9.dev/posts/prox_vpn/figures/cover.png" medium="image" type="image/png" height="108" width="144"/>
+  <media:content url="https://blog.evm9.dev/posts/00_prox_vpn/figures/cover.png" medium="image" type="image/png" height="144" width="144"/>
 </item>
 </channel>
 </rss>
