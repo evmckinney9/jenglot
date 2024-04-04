@@ -1,15 +1,14 @@
 ---
 title: Precompiling Rust for Python Wheel Distribution
 description: |
-    The fusion of Rust with Python brings the best of both worlds: Rust's performance and memory safety, with Python's simplicity and extensive ecosystem. This powerful combination, however, introduces a distribution challenge for developers wanting to reach a broader audience, particularly those with environments only set up for Python. The key to solving this challenge lies in precompiling Rust components before distributing Python wheels, ensuring the modules can be installed via pip without requiring Rust on the target machine.
+    This post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user's machine.
 
 categories: [devops, python, rust, github]
 date: 4/03/2024
 draft: true
 ---
 
-The goal of this post is to document the updates I made to my Python project template to **support creation of packages with integrated Rust that are installable via pip, without the need for a Rust compiler on the installation target**. Utilizing GitHub Actions and cibuildwheel, I automate the creation of wheels across multiple platforms. This process not only streamlines development workflows but also simplifies the distribution of Python packages that include Rust extensions.
-
+The goal of this post is to document the updates I made to my Python project template to **support creation of packages with Rust extensions that are installable via pip, without the need for a Rust compiler on the installation target**. Utilizing GitHub Actions and cibuildwheel, I automate the creation of wheels across multiple platforms. 
 
 Everything that follows has been implemented in my [Python project template](https://github.com/evmckinney9/python-template).
 
@@ -47,7 +46,7 @@ Start with a Python project template that's prepared for Rust integration. Refer
     binding = "PyO3"
     ```
 
-2. **Revise `MANIFEST.in`**: Update this file to include Rust source files in the package, ensuring a comprehensive package build. Guidance on which files to include can be found in the [Setuptools documentation](https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html).
+2. **Revise `MANIFEST.in`**: Update this file to include Rust source files in the package, ensuring a comprehensive package build. Guidance on which files to include can be found in this [Setuptools documentation](https://setuptools.pypa.io/en/latest/userguide/miscellaneous.html).
 
     ```ini
     include pyproject.toml
@@ -77,7 +76,7 @@ Start with a Python project template that's prepared for Rust integration. Refer
 ## Define the Rust Functions
 The process of integrating Rust functions into your Python project involves a few key steps:
 
-1. **Implement Rust Functions**: Start by defining the Rust functions in `crates/src/basic_functions/basic_math.rs`. Utilize PyO3's `#[pyfunction]` attribute to ensure these functions are callable from Python.
+1. **Implement Rust Functions**: Start by defining the Rust functions in `crates/src/basic_functions/basic_math.rs`. USe PyO3's `#[pyfunction]` attribute to ensure these functions are callable from Python.
 
     For example, to add and subtract in Rust:
 
@@ -137,7 +136,7 @@ The process of integrating Rust functions into your Python project involves a fe
 
 Verifying the integration involves a straightforward process:
 
-1. **Instantiate and Build**: After setting up the template and implementing the Rust functions, create a new repository from the template and clone it to your development environment. I use Ubuntu in WSL2, with Rust already installed.
+1. **Instantiate and Build**: After setting up the template and implementing the Rust functions, create a new repository from the template and clone it to your development environment. Iam using Ubuntu in WSL2, with Rust already installed.
 
     ![Figure 1: Creating a new repository from the template.](figures/image1.png)  
 
@@ -150,10 +149,10 @@ Verifying the integration involves a straightforward process:
 
     Successful execution and interaction with the package methods can be confirmed in a Jupyter notebook, indicating the Rust functions are callable from Python.
 
-    ![Figure 2: Successfully calling package methods from Jupyter notebook.](figures/image2.png)
+    ![Figure 2: Successfully calling methods from Jupyter notebook.](figures/image2.png)
 
 ::: {.callout-important}
-Unsuprisingly, attempting to install the package on a Windows environment without Rust results in a build failure.
+Unsuprisingly, attempting to install the package on an environment without Rust results in a build failure.
 
 ```{.bash code-line-numbers="false"}
 evmck@Evan-Desktop ~/Downloads/windows_rust_demo
@@ -174,14 +173,11 @@ This standard project setup leaves us with a clean modular workspace ready for f
 
 # Distributing Wheels
 
-GitHub Actions and cibuildwheel offer a robust solution for automating this process, allowing for the generation of wheels compatible with multiple platforms.
-For more information about the GitHub Actions workflow, refer to the [official documentation](https://docs.github.com/en/actions) and [github-hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners).
+GitHub Actions and cibuildwheel offer a robust solution for automating generation of wheels compatible with multiple platforms. Detailed guidance on setting up workflows can be found in the [GitHub Actions official documentation](https://docs.github.com/en/actions) and information on [github-hosted runners](https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners).
 
 ## Building Wheels for Multiple Platforms
 
-Set up a GitHub Action workflow to utilize cibuildwheel, facilitating the building of wheels. This setup covers Linux, macOS (both Intel and Apple Silicon), and Windows. For more information on cibuildwheel, refer to the [official documentation](https://cibuildwheel.pypa.io/en/stable/).
-
-This [example](https://cibuildwheel.pypa.io/en/stable/setup/#github-actions) demonstrates how to set up GitHub Actions with cibuildwheel for building wheels across different operating systems.
+Configure a GitHub Action workflow to employ cibuildwheel, simplifying the process of generating wheels that cover Linux, macOS (including both Intel and Apple Silicon), and Windows platforms. For more information on cibuildwheel, refer to the [official documentation](https://cibuildwheel.pypa.io/en/stable/). The following [example](https://cibuildwheel.pypa.io/en/stable/setup/#github-actions) will be my starting point:
 
 ```yaml
 name: Build
@@ -209,30 +205,35 @@ jobs:
           path: ./wheelhouse/*.whl
 ```
 
-This YAML configuration automates the wheel building process, ensuring compatibility across different operating systems.
+This configuration automates the wheel building process, ensuring compatibility across different operating systems.
+
+My apologies for that oversight. Let's include the reference to the pre-installed tools in the revised section:
 
 ::: {.callout-note}
-While Python and Rust are pre-installed on GitHub-hosted runners, Linux builds require additional configuration to include the Rust toolchain. Despite Rust [being pre-installed](https://github.com/actions/runner-images#available-images), because the build runs in a [container](https://github.com/pypa/manylinux), not on the host machine itself, we specify an [additional environment variables](https://github.com/pypa/cibuildwheel/issues/1684).
+GitHub-hosted runners already have Python and Rust [pre-installed](https://github.com/actions/runner-images#available-images), but for Linux builds, an additional step is needed to make the Rust toolchain accessible within the [Manylinux container](https://github.com/pypa/manylinux), where the build actually occurs. To ensure the Rust compiler is available for your build, add these environment variables to your workflow:
 
 ```yaml
 env:
   CIBW_BEFORE_BUILD_LINUX: curl -sSf https://sh.rustup.rs | sh -s -- -y
   CIBW_ENVIRONMENT_LINUX: "PATH=$HOME/.cargo/bin:$PATH"
-  CIBW_SKIP: "cp36-* cp37-* cp38-* cp39-* pp* *-win32 *-musllinux* *_i686"
+  CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-win32 *-musllinux* *_i686"
 ```
 
-Note, I also include `CIBW_SKIP`, necessary,... addressing known [compatibility issues](https://github.com/rust-lang/rustup/issues/2984).
+Additionally, specifying `CIBW_SKIP` helps circumvent [known compatibility issues](https://github.com/rust-lang/rustup/issues/2984).
 :::
+
 
 ## Building Wheels for Multiple Python Versions
 
-"By default, Python extension modules can only be used with the same Python version they were compiled against. The advantage of building extension modules using the limited Python API is that package vendors only need to build and distribute a single copy (for each OS / architecture), and users can install it on all Python versions from the minimum version and up."
+Python extension modules are typically tied to the Python version they were compiled against. However, by leveraging the limited Python API (abi3), developers can create extensions that are compatible across multiple Python versions, minimizing the need to build and distribute multiple versions. 
 
-Reference:
-<https://pyo3.rs/v0.21.0/building-and-distribution.html>
-<https://setuptools-rust.readthedocs.io/en/latest/building_wheels.html>
+- **PyO3 Documentation**: Details how to build and distribute Rust-based Python modules or binaries, covering Python version compatibility and linker arguments. [Read the guide](https://pyo3.rs/v0.21.0/building-and-distribution.html).
 
-> Because `setuptools-rust` is an extension to `setuptools`, the standard [`python -m build`](https://pypa-build.readthedocs.io/en/stable/) command (or [`pip wheel --no-deps . --wheel-dir dist`](https://pip.pypa.io/en/stable/cli/pip_wheel/)) can be used to build distributable wheels. These wheels can be uploaded to PyPI using standard tools such as [twine](https://github.com/pypa/twine).
+- **Setuptools-Rust Documentation**: Describes building distributable wheels with `setuptools-rust`, including how to support multiple Python versions in one binary. [See the instructions](https://setuptools-rust.readthedocs.io/en/latest/building_wheels.html).
+
+> Because `setuptools-rust` is an extension to `setuptools`, the standard [`python -m build`](https://pypa-build.readthedocs.io/en/stable/) command can be used to build distributable wheels.
+
+Correctly configuring `abi3` means cibuildwheel can work the same was as before, but with the added benefit of compatibility across multiple Python versions. Here's how to set it up:
 
 1. **Enable `abi3` in PyO3**: Adjust your `crates/Cargo.toml` to activate the `abi3` feature, ensuring compatibility across Python versions:
 
@@ -250,7 +251,7 @@ Reference:
     ```
 
 ::: {.callout-warning}
-(relevant closed issue: <https://github.com/PyO3/setuptools-rust/issues/399>). Note, the official documentation suggests using either setup.cfg or `DIST_EXTRA_CONFIG` environment variable. (I'm not entirely sure this is working still because I don't see this flag as I expect in the action logs.)
+Configuring wheels for `abi3` compatibility via `pyproject.toml`, as outlined in [PyO3/setuptools-rust#399](https://github.com/PyO3/setuptools-rust/issues/399), deviates from standard practices recommended in the official documentation, which suggest using `setup.cfg` or the `DIST_EXTRA_CONFIG` environment variable.
 :::
 
 ## Generate Tagged Release Notes
