@@ -428,5 +428,5 @@ Some things I plan to explore in the future include:
 - **Dockerize the Environment**: Create a Dockerfile to ensure consistent development and testing environments.
 - **Centralize Python Version Management**: Use a single `.python-version` file to specify the Python version across all environments and configurations.
 - **Automate Version Bumping**: Implement an automated system for version management that adheres to semantic versioning.
-- **Simplify Documentation Generation**: Choose a documentation generator that integrates well with your existing setup and automate the process.
-- **Streamline Workflow Debugging**: Explore tools and practices for more efficient debugging of GitHub Actions and template updates.
+- **Simplify Documentation Generation**: Choose a documentation generator that integrates well with my existing setup.
+- **Streamline Workflow Debugging**: Explore tools and practices for more efficient debugging of GitHub Actions.
