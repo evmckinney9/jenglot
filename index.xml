@@ -22,7 +22,7 @@
   <category>github</category>
   <guid>https://blog.evm9.dev/posts/01_rust_wheels/</guid>
   <pubDate>Thu, 04 Apr 2024 00:00:00 GMT</pubDate>
-  <media:content url="https://blog.evm9.dev/posts/01_rust_wheels/figures/cover.png" medium="image" type="image/png" height="147" width="144"/>
+  <media:content url="https://blog.evm9.dev/posts/01_rust_wheels/figures/cover.png" medium="image" type="image/png" height="137" width="144"/>
 </item>
 <item>
   <title>Configuring an LXC container with an external VPN</title>
