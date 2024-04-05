@@ -160,6 +160,8 @@ $ pip install -e git+https://github.com/evmckinney9/template_demo#egg=template_d
 The error encountered:
 
 ```{.text code-line-numbers="false"}
+Error: can't find Rust compiler
+
 ERROR: Failed building editable for template_demo
 Failed to build template_demo
 ERROR: Could not build wheels for template_demo, which is required to install pyproject.toml-based projects 
