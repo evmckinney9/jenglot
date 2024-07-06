@@ -9,7 +9,7 @@
 <link>https://blog.evm9.dev/</link>
 <atom:link href="https://blog.evm9.dev/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog about quantum computing, programming, and other things.</description>
-<generator>quarto-1.4.553</generator>
+<generator>quarto-1.5.53</generator>
 <lastBuildDate>Thu, 04 Apr 2024 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Building Python Wheels with Rust Extensions Using GitHub Actions</title>

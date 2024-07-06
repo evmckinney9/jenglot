@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.553">
+<meta name="generator" content="quarto-1.5.53">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2024-04-04">
 <meta name="description" content="This post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user’s machine.">
 
-<title>Evan’s Blog - Building Python Wheels with Rust Extensions Using GitHub Actions</title>
+<title>Building Python Wheels with Rust Extensions Using GitHub Actions – Evan’s Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -36,7 +36,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -138,7 +138,7 @@ background-size: cover;
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -150,7 +150,7 @@ background-size: cover;
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -548,59 +548,52 @@ Note
 <span id="cb17-40"><a href="#cb17-40"></a><span class="at">    </span><span class="fu">env</span><span class="kw">:</span></span>
 <span id="cb17-41"><a href="#cb17-41"></a><span class="at">      </span><span class="fu">CIBW_BEFORE_BUILD_LINUX</span><span class="kw">:</span><span class="at"> curl -sSf https://sh.rustup.rs | sh -s -- -y</span></span>
 <span id="cb17-42"><a href="#cb17-42"></a><span class="at">      </span><span class="fu">CIBW_ENVIRONMENT_LINUX</span><span class="kw">:</span><span class="at"> </span><span class="st">"PATH=$HOME/.cargo/bin:$PATH"</span></span>
-<span id="cb17-43"><a href="#cb17-43"></a><span class="at">      </span><span class="fu">CIBW_SKIP</span><span class="kw">:</span><span class="at"> </span><span class="st">"cp36-* cp37-* cp38-* cp39-* pp* *-win32 *-musllinux* *_i686"</span></span>
+<span id="cb17-43"><a href="#cb17-43"></a><span class="at">      </span><span class="fu">CIBW_SKIP</span><span class="kw">:</span><span class="at"> </span><span class="st">"cp36-* cp37-* cp38-* pp* *-win32 *-musllinux* *_i686"</span></span>
 <span id="cb17-44"><a href="#cb17-44"></a></span>
 <span id="cb17-45"><a href="#cb17-45"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
-<span id="cb17-46"><a href="#cb17-46"></a></span>
-<span id="cb17-47"><a href="#cb17-47"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
-<span id="cb17-48"><a href="#cb17-48"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check if template_flag.yml is gone</span></span>
-<span id="cb17-49"><a href="#cb17-49"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> check-template</span></span>
-<span id="cb17-50"><a href="#cb17-50"></a><span class="at">        </span><span class="fu">if</span><span class="kw">:</span><span class="at"> ${{ hashFiles('.github/template_flag.yml') == '' }}</span></span>
-<span id="cb17-51"><a href="#cb17-51"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
-<span id="cb17-52"><a href="#cb17-52"></a>          echo "release_continue=true" &gt;&gt; $GITHUB_ENV</span>
-<span id="cb17-53"><a href="#cb17-53"></a></span>
-<span id="cb17-54"><a href="#cb17-54"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build wheels</span></span>
-<span id="cb17-55"><a href="#cb17-55"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> pypa/cibuildwheel@v2.17.0</span></span>
-<span id="cb17-56"><a href="#cb17-56"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/upload-artifact@v4</span></span>
-<span id="cb17-57"><a href="#cb17-57"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
-<span id="cb17-58"><a href="#cb17-58"></a><span class="at">          </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}'</span></span>
-<span id="cb17-59"><a href="#cb17-59"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse/*.whl</span></span>
-<span id="cb17-60"><a href="#cb17-60"></a><span class="at">  </span><span class="fu">release</span><span class="kw">:</span></span>
-<span id="cb17-61"><a href="#cb17-61"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">check-for-flag-file</span><span class="kw">,</span><span class="at"> build_wheels</span><span class="kw">]</span></span>
-<span id="cb17-62"><a href="#cb17-62"></a><span class="at">    </span><span class="fu">if</span><span class="kw">:</span><span class="at"> needs.check-for-flag-file.outputs.continue == 'true'</span></span>
-<span id="cb17-63"><a href="#cb17-63"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
-<span id="cb17-64"><a href="#cb17-64"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
-<span id="cb17-65"><a href="#cb17-65"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check out the repo</span></span>
-<span id="cb17-66"><a href="#cb17-66"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
-<span id="cb17-67"><a href="#cb17-67"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
-<span id="cb17-68"><a href="#cb17-68"></a><span class="at">          </span><span class="fu">fetch-depth</span><span class="kw">:</span><span class="at"> </span><span class="dv">0</span></span>
-<span id="cb17-69"><a href="#cb17-69"></a></span>
-<span id="cb17-70"><a href="#cb17-70"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
-<span id="cb17-71"><a href="#cb17-71"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check for initial commit condition and exit if true</span></span>
-<span id="cb17-72"><a href="#cb17-72"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
-<span id="cb17-73"><a href="#cb17-73"></a>          if [ -f .github/template_flag.yml ]; then</span>
-<span id="cb17-74"><a href="#cb17-74"></a>            echo "Initial commit setup detected, exitting."</span>
-<span id="cb17-75"><a href="#cb17-75"></a>            exit 0</span>
-<span id="cb17-76"><a href="#cb17-76"></a>          fi</span>
-<span id="cb17-77"><a href="#cb17-77"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Set up Node.js</span></span>
-<span id="cb17-78"><a href="#cb17-78"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/setup-node@v4</span></span>
-<span id="cb17-79"><a href="#cb17-79"></a></span>
-<span id="cb17-80"><a href="#cb17-80"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Generate Changelog</span></span>
-<span id="cb17-81"><a href="#cb17-81"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
-<span id="cb17-82"><a href="#cb17-82"></a>          npm install -g conventional-changelog-cli</span>
-<span id="cb17-83"><a href="#cb17-83"></a>          conventional-changelog -p conventionalcommits -r 2 | tail -n +3 &gt; CHANGELOG.tmp</span>
-<span id="cb17-84"><a href="#cb17-84"></a></span>
-<span id="cb17-85"><a href="#cb17-85"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/download-artifact@v4</span></span>
-<span id="cb17-86"><a href="#cb17-86"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
-<span id="cb17-87"><a href="#cb17-87"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse</span></span>
-<span id="cb17-88"><a href="#cb17-88"></a></span>
-<span id="cb17-89"><a href="#cb17-89"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Create Release</span></span>
-<span id="cb17-90"><a href="#cb17-90"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> softprops/action-gh-release@v2</span></span>
-<span id="cb17-91"><a href="#cb17-91"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
-<span id="cb17-92"><a href="#cb17-92"></a><span class="at">          </span><span class="fu">files</span><span class="kw">:</span><span class="at"> ./wheelhouse/**/*.whl</span></span>
-<span id="cb17-93"><a href="#cb17-93"></a><span class="at">          </span><span class="fu">body_path</span><span class="kw">:</span><span class="at"> CHANGELOG.tmp</span></span>
-<span id="cb17-94"><a href="#cb17-94"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
-<span id="cb17-95"><a href="#cb17-95"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> </span><span class="st">'${{ secrets.GITHUB_TOKEN }}'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-46"><a href="#cb17-46"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Build wheels</span></span>
+<span id="cb17-47"><a href="#cb17-47"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> pypa/cibuildwheel@v2.17.0</span></span>
+<span id="cb17-48"><a href="#cb17-48"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/upload-artifact@v4</span></span>
+<span id="cb17-49"><a href="#cb17-49"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-50"><a href="#cb17-50"></a><span class="at">          </span><span class="fu">name</span><span class="kw">:</span><span class="at"> </span><span class="st">'cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}'</span></span>
+<span id="cb17-51"><a href="#cb17-51"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse/*.whl</span></span>
+<span id="cb17-52"><a href="#cb17-52"></a><span class="at">          </span></span>
+<span id="cb17-53"><a href="#cb17-53"></a><span class="at">  </span><span class="fu">release</span><span class="kw">:</span></span>
+<span id="cb17-54"><a href="#cb17-54"></a><span class="at">    </span><span class="fu">needs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="at">check-for-flag-file</span><span class="kw">,</span><span class="at"> build_wheels</span><span class="kw">]</span></span>
+<span id="cb17-55"><a href="#cb17-55"></a><span class="at">    </span><span class="fu">if</span><span class="kw">:</span><span class="at"> needs.check-for-flag-file.outputs.continue == 'true'</span></span>
+<span id="cb17-56"><a href="#cb17-56"></a><span class="at">    </span><span class="fu">runs-on</span><span class="kw">:</span><span class="at"> ubuntu-latest</span></span>
+<span id="cb17-57"><a href="#cb17-57"></a><span class="at">    </span><span class="fu">steps</span><span class="kw">:</span></span>
+<span id="cb17-58"><a href="#cb17-58"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check out the repo</span></span>
+<span id="cb17-59"><a href="#cb17-59"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb17-60"><a href="#cb17-60"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-61"><a href="#cb17-61"></a><span class="at">          </span><span class="fu">fetch-depth</span><span class="kw">:</span><span class="at"> </span><span class="dv">0</span></span>
+<span id="cb17-62"><a href="#cb17-62"></a></span>
+<span id="cb17-63"><a href="#cb17-63"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/checkout@v4</span></span>
+<span id="cb17-64"><a href="#cb17-64"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Check for initial commit condition and exit if true</span></span>
+<span id="cb17-65"><a href="#cb17-65"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb17-66"><a href="#cb17-66"></a>          if [ -f .github/template_flag.yml ]; then</span>
+<span id="cb17-67"><a href="#cb17-67"></a>            echo "Initial commit setup detected, exitting."</span>
+<span id="cb17-68"><a href="#cb17-68"></a>            exit 0</span>
+<span id="cb17-69"><a href="#cb17-69"></a>          fi</span>
+<span id="cb17-70"><a href="#cb17-70"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Set up Node.js</span></span>
+<span id="cb17-71"><a href="#cb17-71"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/setup-node@v4</span></span>
+<span id="cb17-72"><a href="#cb17-72"></a></span>
+<span id="cb17-73"><a href="#cb17-73"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Generate Changelog</span></span>
+<span id="cb17-74"><a href="#cb17-74"></a><span class="fu">        run</span><span class="kw">: </span><span class="ch">|</span></span>
+<span id="cb17-75"><a href="#cb17-75"></a>          npm install -g conventional-changelog-cli</span>
+<span id="cb17-76"><a href="#cb17-76"></a>          conventional-changelog -p conventionalcommits -r 2 | tail -n +3 &gt; CHANGELOG.tmp</span>
+<span id="cb17-77"><a href="#cb17-77"></a></span>
+<span id="cb17-78"><a href="#cb17-78"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> actions/download-artifact@v4</span></span>
+<span id="cb17-79"><a href="#cb17-79"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-80"><a href="#cb17-80"></a><span class="at">          </span><span class="fu">path</span><span class="kw">:</span><span class="at"> ./wheelhouse</span></span>
+<span id="cb17-81"><a href="#cb17-81"></a></span>
+<span id="cb17-82"><a href="#cb17-82"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="fu">name</span><span class="kw">:</span><span class="at"> Create Release</span></span>
+<span id="cb17-83"><a href="#cb17-83"></a><span class="at">        </span><span class="fu">uses</span><span class="kw">:</span><span class="at"> softprops/action-gh-release@v2</span></span>
+<span id="cb17-84"><a href="#cb17-84"></a><span class="at">        </span><span class="fu">with</span><span class="kw">:</span></span>
+<span id="cb17-85"><a href="#cb17-85"></a><span class="at">          </span><span class="fu">files</span><span class="kw">:</span><span class="at"> ./wheelhouse/**/*.whl</span></span>
+<span id="cb17-86"><a href="#cb17-86"></a><span class="at">          </span><span class="fu">body_path</span><span class="kw">:</span><span class="at"> CHANGELOG.tmp</span></span>
+<span id="cb17-87"><a href="#cb17-87"></a><span class="at">        </span><span class="fu">env</span><span class="kw">:</span></span>
+<span id="cb17-88"><a href="#cb17-88"></a><span class="at">          </span><span class="fu">GITHUB_TOKEN</span><span class="kw">:</span><span class="at"> </span><span class="st">'${{ secrets.GITHUB_TOKEN }}'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="verification" class="level2">
 <h2 class="anchored" data-anchor-id="verification">Verification</h2>
 <p>Now that I have implemented all the necessary changes, I can verify the process by following these steps:</p>
@@ -693,18 +686,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -736,7 +718,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp("https:\/\/blog\.evm9\.dev");
@@ -744,7 +748,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://blog.evm9.dev/posts/01_rust_wheels/index.html</loc>
-    <lastmod>2024-04-05T20:59:27.346Z</lastmod>
+    <loc>https://blog.evm9.dev/index.html</loc>
+    <lastmod>2024-07-06T20:08:37.807Z</lastmod>
   </url>
   <url>
-    <loc>https://blog.evm9.dev/index.html</loc>
-    <lastmod>2024-04-05T20:59:27.306Z</lastmod>
+    <loc>https://blog.evm9.dev/posts/01_rust_wheels/index.html</loc>
+    <lastmod>2024-07-06T20:08:37.851Z</lastmod>
   </url>
   <url>
     <loc>https://blog.evm9.dev/posts/00_prox_vpn/index.html</loc>
-    <lastmod>2024-04-05T20:59:27.326Z</lastmod>
+    <lastmod>2024-07-06T20:08:37.827Z</lastmod>
   </url>
 </urlset>

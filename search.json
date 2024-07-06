@@ -1,5 +1,12 @@
 [
   {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Evan's Blog",
+    "section": "",
+    "text": "Building Python Wheels with Rust Extensions Using GitHub Actions\n\n\n\n\n\n\ndevops\n\n\npython\n\n\nrust\n\n\ngithub\n\n\n\nThis post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user’s machine. \n\n\n\n\n\nApr 4, 2024\n\n\n\n\n\n\n\n\n\n\n\n\nConfiguring an LXC container with an external VPN\n\n\n\n\n\n\nproxmox\n\n\nsysops\n\n\n\nThis guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications. \n\n\n\n\n\nMar 20, 2024\n\n\n\n\n\n\nNo matching items"
+  },
+  {
     "objectID": "posts/01_rust_wheels/index.html",
     "href": "posts/01_rust_wheels/index.html",
     "title": "Building Python Wheels with Rust Extensions Using GitHub Actions",
@@ -61,13 +68,6 @@
     "title": "Building Python Wheels with Rust Extensions Using GitHub Actions",
     "section": "Next Steps",
     "text": "Next Steps\nSome things I plan to explore in the future include:\n\nDockerize the Environment: Create a Dockerfile to ensure consistent development and testing environments.\nCentralize Python Version Management: Use a single .python-version file to specify the Python version across all environments and configurations.\nAutomate Version Bumping: Implement an automated system for version management that adheres to semantic versioning.\nSimplify Documentation Generation: Choose a documentation generator that integrates well with my existing setup.\nStreamline Workflow Debugging: Explore tools and practices for more efficient debugging of GitHub Actions."
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Evan's Blog",
-    "section": "",
-    "text": "Building Python Wheels with Rust Extensions Using GitHub Actions\n\n\n\n\n\n\ndevops\n\n\npython\n\n\nrust\n\n\ngithub\n\n\n\nThis post covers automating the build process of Python wheels with Rust extensions using GitHub Actions and cibuildwheel, eliminating the need for Rust on the end user’s machine. \n\n\n\n\n\nApr 4, 2024\n\n\n\n\n\n\n\n\n\n\n\n\nConfiguring an LXC container with an external VPN\n\n\n\n\n\n\nproxmox\n\n\nsysops\n\n\n\nThis guide explains how to integrate your LXC container with an external VPN service to enhance the privacy and security of your containerized applications. \n\n\n\n\n\nMar 20, 2024\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "posts/00_prox_vpn/index.html",
