@@ -344,23 +344,16 @@ jobs:
     env:
       CIBW_BEFORE_BUILD_LINUX: curl -sSf https://sh.rustup.rs | sh -s -- -y
       CIBW_ENVIRONMENT_LINUX: "PATH=$HOME/.cargo/bin:$PATH"
-      CIBW_SKIP: "cp36-* cp37-* cp38-* cp39-* pp* *-win32 *-musllinux* *_i686"
+      CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-win32 *-musllinux* *_i686"
 
     steps:
-
-      - uses: actions/checkout@v4
-      - name: Check if template_flag.yml is gone
-        id: check-template
-        if: ${{ hashFiles('.github/template_flag.yml') == '' }}
-        run: |
-          echo "release_continue=true" >> $GITHUB_ENV
-
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.17.0
       - uses: actions/upload-artifact@v4
         with:
           name: 'cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}'
           path: ./wheelhouse/*.whl
+          
   release:
     needs: [check-for-flag-file, build_wheels]
     if: needs.check-for-flag-file.outputs.continue == 'true'
